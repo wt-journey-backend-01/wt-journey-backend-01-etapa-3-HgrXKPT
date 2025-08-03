@@ -5,7 +5,7 @@ const Joi = require('joi');
 
 
 async function findAll(req, res) {
-  const { cargo, sort } = req.query;
+  const { cargo, agente_id,sort } = req.query;
 
   let agentes = await agentesRepository.findAll();
 
@@ -13,6 +13,10 @@ async function findAll(req, res) {
     agentes = agentes.filter((a) =>
       a.cargo.toLowerCase().includes(cargo.toLowerCase())
     );
+  }
+
+  if (agente_id) {
+    casos = casos.filter((c) => c.agente_id === agente_id);
   }
 
   if (sort === "dataDeIncorporacao") {
@@ -34,6 +38,7 @@ async function findById(req, res) {
   const { id } = req.params;
 
   const agente = await agentesRepository.findAgentById(id);
+
   if (!agente) {
     return res.status(404).json({
       status: 404,
@@ -63,26 +68,7 @@ async function addAgente(req, res) {
     });
   }
 
-  const data = parseISO(dataDeIncorporacao);
-  if (!isValid(data)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Data inválida",
-      errors: {
-        dataDeIncorporacao: "Formato de data inválido, use YYYY-MM-DD",
-      },
-    });
-  }
-
-  if (isFuture(data)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Data inválida",
-      errors: {
-        dataDeIncorporacao: "Data de incorporação não pode ser no futuro",
-      },
-    });
-  }
+  validateDate(dataDeIncorporacao);
 
   const newAgent = {
     nome,
@@ -140,7 +126,7 @@ async function partialUpdate(req, res) {
 
   const partialSchema = Joi.object({
     nome: Joi.string().trim().min(1).optional(),
-    dataDeIncorporacao: Joi.string().trim().min(1).optional(),
+    dataDeIncorporacao: Joi.date().iso().optional(),
     cargo: Joi.string().trim().min(1).optional()
   }).min(1);
 
@@ -194,9 +180,9 @@ async function deleteAgent(req, res) {
   const removed = await agentesRepository.deleteAgent(id);
 
   if (!removed) {
-    return res.status(404).json({
+        return res.status(404).json({
       status: 404,
-      message: "Parâmetros inválidos",
+      message: "Agente não encontrado",
       errors: {
         id: "O agente não foi encontrado",
       },
@@ -204,6 +190,31 @@ async function deleteAgent(req, res) {
   };
 
   res.status(204).send();
+}
+
+function validateDate(dateString){
+
+  const data = parseISO(dataDeIncorporacao);
+  if (!isValid(data)) {
+    return res.status(400).json({
+      status: 400,
+      message: "Data inválida",
+      errors: {
+        dataDeIncorporacao: "Formato de data inválido, use YYYY-MM-DD",
+      },
+    });
+  }
+
+  if (isFuture(data)) {
+    return res.status(400).json({
+      status: 400,
+      message: "Data inválida",
+      errors: {
+        dataDeIncorporacao: "Data de incorporação não pode ser no futuro",
+      },
+    });
+  }
+
 }
 
 module.exports = {

@@ -4,7 +4,8 @@ const db = require('../db/db');
 
 
  async function findAll() {
-    return await db('casos').select('*');
+    const casos = await db('casos').select('*');
+    return casos;
 }
 
  async function findCaseById(id){

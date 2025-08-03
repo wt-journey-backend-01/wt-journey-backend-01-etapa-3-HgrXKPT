@@ -21,7 +21,7 @@ async function findAgentById(id){
     
   }
 
-async function updateAgents(id,agenteData){
+async function updateAgent(id,agenteData){
     const [updatedAgent] = await db('agentes').where({ id }).update(agenteData).returning('*');
     return updatedAgent;
 }
@@ -41,6 +41,6 @@ module.exports ={
     findAll,
     findAgentById,
     createAgent,
-    updateAgents,
+    updateAgent,
     deleteAgent
 }

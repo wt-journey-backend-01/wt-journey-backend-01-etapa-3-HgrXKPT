@@ -178,7 +178,7 @@ async function  partialUpdateCase(req, res) {
 
   const fields = req.body;
 
-  if (req.body.id && req.body.id !== id) {
+  if (req.body.id && req.body.id !== caso_id) {
   return res.status(400).json({
     status: 400,
     message: "Não é permitido alterar o campo 'id'.",
@@ -213,9 +213,9 @@ async function  partialUpdateCase(req, res) {
   }
 
   if (fields.agente_id) {
-    const agenteExiste = await agentesRepository
-      .findAll()
-      .some((agente) => agente.id === fields.agente_id);
+    
+    const agentes = await agentesRepository.findAll();
+    const agenteExiste = agentes.some((agente) => agente.id === fields.agente_id);
 
     if (!agenteExiste) {
       return res.status(404).json({
