@@ -1,37 +1,37 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 9 créditos restantes para usar o sistema de feedback AI.
+Você tem 8 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para HgrXKPT:
 
 Nota final: **0.0/100**
 
-# Olá, HgrXKPT! 👋🚓
+# Feedback para você, HgrXKPT! 🚓✨
 
-Primeiramente, quero te parabenizar pela coragem de encarar esse desafio de criar uma API RESTful para o Departamento de Polícia! Trabalhar com Node.js e Express.js, organizando o código em rotas, controllers e repositories, não é tarefa simples, e você já mostrou que entende a importância dessa arquitetura modular. 🎉
+Olá! Primeiro, quero te parabenizar pela coragem e esforço em montar essa API para o Departamento de Polícia! 👏 É um desafio e tanto, e você já mostrou ter uma boa noção da estrutura básica do Express, uso de middlewares e organização em arquivos separados. Além disso, você conseguiu implementar validações de payload e tratamento de erros para os formatos incorretos — isso é super importante para garantir a robustez da sua API! 🎯
 
-Além disso, vi que você implementou corretamente as validações básicas de payload (status 400 para dados mal formatados), o que é um ótimo começo para garantir a qualidade dos dados que entram na sua API. Isso mostra que você está atento à integridade das informações — excelente! 👏
-
----
-
-## Vamos analisar juntos o que pode estar travando a sua API e como podemos destravar essa nota, combinado? 🕵️‍♂️🔍
+Também notei que você tentou implementar filtros, ordenação e mensagens de erro customizadas, o que é um baita diferencial! Mesmo que ainda não estejam funcionando 100%, o esforço para ir além do básico é muito válido! 🚀
 
 ---
 
-## 1. Estrutura do Projeto: o arquivo `project_structure.txt` está ausente!
+## Vamos analisar juntos alguns pontos que precisam de atenção para destravar o seu projeto e fazer sua API brilhar! 💡
 
-Um ponto importante que notei é que você não enviou o arquivo `project_structure.txt` no seu repositório. Esse arquivo era esperado para ajudar a validar sua organização de pastas e arquivos.
+---
 
-**Por que isso importa?**
+### 1. Estrutura do Projeto: Onde está o arquivo `project_structure.txt`? 📁
 
-Ter uma estrutura clara e organizada, como:
+Vi que o arquivo `project_structure.txt` não está presente no seu repositório. Isso pode indicar que a estrutura do seu projeto não está exatamente como o esperado.
+
+A organização é fundamental para facilitar a manutenção e o entendimento do código, principalmente em projetos com múltiplos recursos, como agentes e casos.
+
+A estrutura esperada é esta aqui:
 
 ```
 📦 SEU-REPOSITÓRIO
 │
 ├── package.json
 ├── server.js
-├── .env (opcional)
+├── .env (opcional para centralizar configurações)
 │
 ├── routes/
 │   ├── agentesRoutes.js
@@ -52,261 +52,192 @@ Ter uma estrutura clara e organizada, como:
     └── errorHandler.js
 ```
 
-é fundamental para manter seu código escalável, legível e facilitar a manutenção. Além disso, é um requisito do desafio.
-
-**Dica:** Mesmo que o arquivo `project_structure.txt` seja opcional para você criar manualmente, é importante garantir que seu projeto siga essa estrutura para que o avaliador (humano ou automático) consiga encontrar tudo certinho. 😉
-
----
-
-## 2. Foco nos Endpoints de `/agentes` e `/casos`: Eles estão implementados, mas há detalhes importantes!
-
-### Sobre os Endpoints de `/agentes`
-
-Você implementou as rotas e controllers para os agentes, o que é ótimo! Mas, ao analisar o repositório, percebi alguns pontos que podem estar causando falhas:
-
-- Na função `updateAgents` do `agentesRepository.js`, você está usando:
-
-```js
-async function updateAgents(id, agenteData){
-    return db('agentes').where({ id }).update(agenteData).returning('*');
-}
-```
-
-O problema é que o método `.update()` do Knex retorna um array com os registros atualizados (mesmo que seja um só). Então, no controller, quando você faz:
-
-```js
-const updated = await agentesRepository.updateAgents(id, newAgent);
-if (!updated) {
-  // ...
-}
-res.status(200).json(updated);
-```
-
-`updated` será um array, que em JavaScript é sempre truthy, mesmo vazio. Isso pode causar comportamentos inesperados, como retornar um array vazio em vez do objeto atualizado.
-
-**Como corrigir?** Você pode pegar o primeiro elemento do array retornado:
-
-```js
-const [updatedAgent] = await agentesRepository.updateAgents(id, newAgent);
-if (!updatedAgent) {
-  // agente não encontrado
-}
-res.status(200).json(updatedAgent);
-```
-
-O mesmo cuidado vale para o método `updateAgents` e para o `updateCase` no `casosRepository.js`.
+**Por que isso importa?**  
+Se as pastas e arquivos não estiverem organizados assim, o servidor pode não conseguir encontrar as rotas, controladores ou repositórios, o que impacta diretamente no funcionamento dos endpoints.
 
 ---
 
-### Sobre os Endpoints de `/casos`
+### 2. Endpoints e Controladores: Eles estão implementados corretamente? 🤔
 
-Aqui, percebi um problema mais crítico que pode estar bloqueando várias funcionalidades:
+Eu vi que você tem os arquivos de rotas (`routes/agentesRoutes.js` e `routes/casosRoutes.js`) configurados com as rotas e apontando para os respectivos controladores. Isso é ótimo!
 
-- Na função `createCase` do `casosRepository.js`, você tem:
+No entanto, ao analisar os controladores, percebi que:
+
+- No arquivo `controllers/casosController.js`, a função `getCasoById` tem um trecho problemático:
 
 ```js
-async function createCase(caseData){
-    return await db('casos')
-        .insert(caseData)
-        .returning('*'); // Retorna todas as colunas do registro criado
+async function getCasoById(req, res) {
+  const { agente_id } = req.query;
+  const { caso_id } = req.params;
+
+  let caso = await casosRepository.findCaseById(caso_id);
+
+  if (!caso) {
+    return res.status(404).json({
+      status: 404,
+      message: "Caso inexistente",
+      errors: {
+        caso_id: "O caso não foi encontrado" },
+    });
+  };
+
+  if (agente_id) {
+    caso = caso.id.filter((c) => c.agente_id === agente_id);
+  }
+
+  res.status(200).json(caso);
 }
 ```
 
-Assim como no caso dos agentes, o `.insert()` com `.returning('*')` retorna um array de registros criados, não um único objeto. No controller `createCase` você faz:
+Aqui, a linha `caso = caso.id.filter(...)` não faz sentido, pois `caso` é um objeto único retornado do banco, e `caso.id` é provavelmente uma string ou número, que não tem o método `.filter()`. Isso vai gerar erro em tempo de execução.
+
+**Como corrigir?**  
+Se a ideia era filtrar casos por `agente_id`, isso deve acontecer no endpoint de listagem (`getAllCasos`), e não ao buscar um caso específico por ID. Então, você pode remover esse bloco do `getCasoById`:
 
 ```js
-const createdCase =  await casosRepository.createCase(newCase);
-res.status(201).json(createdCase);
-```
-
-Aqui, `createdCase` é um array, mas você está retornando direto, o que pode confundir o cliente da API e os testes.
-
-**Solução:** Retorne o primeiro elemento do array:
-
-```js
-const [createdCase] = await casosRepository.createCase(newCase);
-res.status(201).json(createdCase);
-```
-
-- Além disso, na função `getCasoById` do `casosController.js`, há um erro na manipulação do filtro:
-
-```js
+// Remova este bloco:
 if (agente_id) {
   caso = caso.id.filter((c) => c.agente_id === agente_id);
 }
 ```
 
-Aqui, `caso` é um objeto único retornado pelo banco (não um array). E `caso.id` é provavelmente uma string (o id do caso). Você está tentando usar `.filter` em uma string, o que vai gerar erro.
-
-**Correção:**
-
-Se a ideia é filtrar casos pelo agente, isso deve ser feito antes, na função `getAllCasos`. No `getCasoById`, você simplesmente retorna o caso encontrado, não precisa filtrar.
-
-Portanto, remova esse bloco ou ajuste para não filtrar um objeto único.
-
 ---
 
-### Sobre o Método PATCH em `parcialUpdateCase`
+### 3. Repositórios: Atenção ao retorno das funções de update e delete! ⚠️
 
-Na função `parcialUpdateCase` do `casosController.js`, você faz a verificação do agente responsável assim:
+No arquivo `repositories/casosRepository.js`, as funções `updateCase` e `deleteCase` estão assim:
 
 ```js
-if (fields.agente_id) {
-  const agenteExiste = agentesRepository
-    .findAll()
-    .some((agente) => agente.id === fields.agente_id);
+function updateCase(id, caseData){
+  return db('casos')
+      .where({ id })
+      .update(caseData)
+      .returning('*'); // Retorna todas as colunas do registro atualizado
+}
 
-  if (!agenteExiste) {
-    return res.status(404).json({
-      status: 404,
-      message: `Agente responsável não encontrado`,
-    });
-  }
-};
-```
-
-Aqui, `agentesRepository.findAll()` é uma função assíncrona que retorna uma Promise, mas você está usando `.some()` diretamente, como se fosse síncrono. Isso vai falhar.
-
-**Como corrigir?**
-
-Use `await` para esperar o resultado:
-
-```js
-if (fields.agente_id) {
-  const agentes = await agentesRepository.findAll();
-  const agenteExiste = agentes.some((agente) => agente.id === fields.agente_id);
-
-  if (!agenteExiste) {
-    return res.status(404).json({
-      status: 404,
-      message: `Agente responsável não encontrado`,
-    });
-  }
-};
-```
-
-Esse detalhe é fundamental para que a validação funcione corretamente.
-
----
-
-## 3. Penalidade: Arquivo `.env` na raiz do projeto
-
-Vi que você tem um arquivo `.env` na raiz, o que é esperado, mas foi marcado como penalidade. Isso pode acontecer se o arquivo estiver sendo enviado no repositório público, com dados sensíveis.
-
-**Dica:** Sempre adicione o arquivo `.env` no `.gitignore` para evitar que ele seja versionado e exposto.
-
----
-
-## 4. Recomendações para Aprimorar sua API
-
-- **Trate os retornos do Knex com atenção**: métodos como `.insert()` e `.update()` com `.returning('*')` retornam arrays. Sempre extraia o primeiro elemento para trabalhar com o objeto correto.
-
-- **Evite manipular dados assíncronos como síncronos**: funções que retornam Promises (como `findAll()`) devem ser usadas com `await` para garantir que você tem os dados antes de executar operações.
-
-- **Valide o payload com ferramentas como Joi**: você já usa Joi em alguns lugares, parabéns! Isso ajuda muito a manter o código limpo e seguro.
-
-- **Organize a estrutura de arquivos conforme esperado**: isso facilita a manutenção e a escalabilidade do seu projeto.
-
----
-
-## 5. Trechos de código com sugestões para você aplicar:
-
-### Ajuste no updateAgents para retornar o objeto atualizado:
-
-```js
-async function updateAgents(id, agenteData){
-    const [updatedAgent] = await db('agentes').where({ id }).update(agenteData).returning('*');
-    return updatedAgent;
+function deleteCase(id){
+  return db('casos')
+      .where({ id })
+      .del()
+      .returning('*'); // Retorna todas as colunas do registro deletado
 }
 ```
 
-### Ajuste no createCase para retornar o objeto criado:
+O problema aqui é que o método `.returning('*')` do Knex retorna um array (mesmo que com um único elemento), mas no seu controlador você está esperando um objeto, como em:
 
 ```js
-async function createCase(caseData){
-    const [createdCase] = await db('casos').insert(caseData).returning('*');
-    return createdCase;
+const updated = await casosRepository.updateCase(caso_id, value);
+res.status(200).json(updated);
+```
+
+Se `updated` for um array, isso pode causar problemas na resposta.
+
+**Solução:**  
+Você deve tratar o retorno para pegar o primeiro elemento do array, assim como fez no `createCase`, por exemplo:
+
+```js
+async function updateCase(id, caseData){
+  const [updatedCase] = await db('casos')
+      .where({ id })
+      .update(caseData)
+      .returning('*');
+  return updatedCase;
+}
+
+async function deleteCase(id){
+  const deletedCount = await db('casos')
+      .where({ id })
+      .del();
+  return deletedCount; // Retorna o número de registros deletados
 }
 ```
 
-### Ajuste na validação assíncrona do agente no PATCH de casos:
+Note que para o delete, o `.del()` não retorna os dados deletados, mas sim a contagem de linhas removidas. Assim, no seu controlador, você pode verificar se o retorno é maior que zero para saber se deletou algo.
+
+---
+
+### 4. Validação e uso correto do campo `id` nos updates 🛠️
+
+No controlador `agentesController.js`, você tem uma validação para impedir alteração do campo `id` no update, o que é ótimo para manter a integridade dos dados:
 
 ```js
-async function parcialUpdateCase(req, res) {
-  const { caso_id } = req.params;
-  const fields = req.body;
-
-  const existingCase = await casosRepository.findCaseById(caso_id);
-  if (!existingCase) {
-    return res.status(404).json({
-      status: 404,
-      message: "Caso não encontrado",
-      errors: {
-        caso_id: "Nenhum caso encontrado com o ID fornecido",
-      },
-    });
-  };
-
-  if (
-    fields.status &&
-    fields.status !== `aberto` &&
-    fields.status !== `solucionado`
-  ) {
-    return res.status(400).json({
-      message: "Status inválido",
-      errors: {
-        status: "Use apenas 'aberto' ou 'solucionado'",
-      },
-    });
-  }
-
-  if (fields.agente_id) {
-    const agentes = await agentesRepository.findAll();
-    const agenteExiste = agentes.some((agente) => agente.id === fields.agente_id);
-
-    if (!agenteExiste) {
-      return res.status(404).json({
-        status: 404,
-        message: `Agente responsável não encontrado`,
-      });
-    }
-  };
-
-  const updated = await casosRepository.updateCase(caso_id, fields);
-
-  res.status(200).json(updated);
+if (req.body.id && req.body.id !== id) {
+  return res.status(400).json({
+    status: 400,
+    message: "Não é permitido alterar o campo 'id'.",
+  });
 }
 ```
 
----
-
-## 6. Recursos para você se aprofundar e fortalecer seu conhecimento:
-
-- [Fundamentos de API REST e Express.js](https://youtu.be/RSZHvQomeKE) — para revisar conceitos básicos e rotas.
-- [Documentação oficial do Express.js sobre roteamento](https://expressjs.com/pt-br/guide/routing.html) — para entender melhor como organizar suas rotas.
-- [Validação de dados em APIs Node.js/Express com Joi](https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_) — para melhorar ainda mais o tratamento dos dados.
-- [Manipulação de arrays no JavaScript](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI) — para garantir que você está usando métodos como `.filter`, `.some` e `.map` corretamente.
-- [Status HTTP 400 e 404 - MDN](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400) e [404 - MDN](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404) — para entender melhor o significado e uso correto desses códigos em APIs.
+Porém, essa verificação está ausente em algumas funções, por exemplo no `parcialUpdateCase` do `casosController.js`. Recomendo adicionar a mesma lógica para evitar que o `id` seja alterado via PATCH.
 
 ---
 
-## 📋 Resumo rápido para você focar:
+### 5. Uso correto do `.env` e porta do servidor 🌐
 
-- Corrija os métodos do repository para sempre retornar um objeto (extrair o primeiro elemento do array retornado pelo Knex).
-- Ajuste a função `getCasoById` para não tentar filtrar um objeto único como se fosse um array.
-- Use `await` ao chamar funções assíncronas antes de manipular seus resultados (ex: em validações no PATCH).
-- Garanta que seu projeto está organizado conforme a estrutura esperada, incluindo o arquivo `project_structure.txt`.
-- Não envie o arquivo `.env` no repositório público; use `.gitignore` para evitar isso.
-- Continue utilizando Joi para validação e melhore as mensagens de erro personalizadas.
-- Pratique manipulação correta de arrays e objetos em JavaScript.
+No seu `server.js`, você faz:
+
+```js
+require('dotenv').config();
+const port = process.env.PORT;
+```
+
+Mas não vi o arquivo `.env` no seu repositório, e foi detectado que o arquivo `.env` está na raiz (o que é correto), porém, se ele não existir, o `port` será `undefined`, e seu servidor não vai rodar.
+
+**Sugestão:**  
+Defina uma porta padrão para o servidor caso a variável de ambiente não esteja definida:
+
+```js
+const port = process.env.PORT || 3000;
+```
+
+Assim, seu servidor sempre terá uma porta para escutar, facilitando testes locais.
 
 ---
 
-HgrXKPT, você já tem uma base sólida, e com esses ajustes seu projeto vai ganhar muita força! 💪🚀 Não desanime, pois aprender a lidar com esses detalhes é o que separa um bom dev de um dev excelente. Continue praticando, revisando seu código e testando bastante. Estou aqui torcendo pelo seu sucesso! 🎯
+### 6. Pequenos detalhes que podem impactar a funcionalidade 🚧
 
-Se precisar de ajuda para entender qualquer ponto, me chama! Vamos juntos nessa jornada! 😉
+- No `casosController.js`, na função `getAgenteAssocitateToCase`, o nome da função está com um pequeno erro de digitação: `getAgenteAssocitateToCase` deveria ser `getAgenteAssociateToCase` (ou similar). Embora isso não quebre o código, é uma boa prática manter nomes claros e corretos para evitar confusões futuras.
 
-Abraços e até a próxima revisão! 👮‍♂️✨
+- No `repositories/agentesRepository.js`, o método `deleteAgent` retorna diretamente o resultado de `.del()`, que é um número (quantidade deletada). No seu controlador, você verifica se esse valor existe para decidir se retornará 404 ou 204, o que está correto.
+
+---
+
+## Recursos que vão te ajudar a aprimorar seu projeto 📚
+
+- Para entender melhor a estrutura de rotas e controllers no Express, recomendo muito este vídeo:  
+  https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH  
+  Ele explica como organizar seu projeto usando MVC, o que vai te ajudar a manter tudo limpo e funcional.
+
+- Para aprofundar no uso correto dos métodos HTTP e status codes, este vídeo é excelente:  
+  https://youtu.be/RSZHvQomeKE  
+  Ele vai te ajudar a entender quando usar cada status code e como estruturar suas respostas.
+
+- Para aprender a manipular arrays e objetos corretamente em JavaScript, fundamental para filtrar e buscar dados, veja:  
+  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
+
+- Para validar dados e criar respostas de erro customizadas, este tutorial é muito esclarecedor:  
+  https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_
+
+---
+
+## Resumo rápido para você focar nos próximos passos 🚦
+
+- **Organize seu projeto** conforme a estrutura esperada, garantindo que todos os arquivos estejam onde devem estar.  
+- **Corrija o uso incorreto de métodos de array** no controlador `getCasoById` (remova o `.filter()` aplicado a um objeto).  
+- **Ajuste os repositórios para que retornem objetos únicos** nos updates e tratem corretamente o retorno do delete.  
+- **Implemente validação para impedir alteração do campo `id`** também na atualização parcial dos casos.  
+- **Configure uma porta padrão no `server.js`** para evitar problemas na inicialização do servidor.  
+- **Revise nomes de funções para evitar erros de digitação** e manter o código limpo.  
+- Continue aprimorando as mensagens de erro customizadas e filtros para melhorar a experiência da API! 🚀
+
+---
+
+HgrXKPT, você está no caminho certo! 💪 Cada ajuste que você fizer vai destravar funcionalidades importantes e fazer sua API funcionar como um relógio. Não desanime com os obstáculos, pois são eles que fazem a gente aprender de verdade! Estou aqui torcendo por você e disponível para ajudar sempre que precisar. 🌟
+
+Bora codar e fazer essa API acontecer! 👮‍♂️👮‍♀️💙
+
+Abraços do seu Code Buddy! 🤖✨
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
