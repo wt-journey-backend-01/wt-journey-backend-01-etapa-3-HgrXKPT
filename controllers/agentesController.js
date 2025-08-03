@@ -94,10 +94,17 @@ async function addAgente(req, res) {
 }
 
 async function updateAgent(req, res) {
+
+  const agentSchema = Joi.object({
+  nome: Joi.string().required(),
+  dataDeIncorporacao: Joi.date().iso().required(),
+  cargo: Joi.string().required()
+});
+  try{
   const { id } = req.params;
 
 
-  const { nome, dataDeIncorporacao, cargo } = req.body;
+  const { error } = agentSchema.validate(req.body);
 
   if (req.body.id && req.body.id !== id) {
     return res.status(400).json({
@@ -105,56 +112,29 @@ async function updateAgent(req, res) {
       message: "Não é permitido alterar o campo 'id'.",
     });
   }
+ if (error) {
+      return res.status(400).json({
+        status: 400,
+        message: "Dados inválidos",
+        errors: error.details
+      });
+    }
 
-  if (!nome && !dataDeIncorporacao && !cargo) {
-    return res.status(400).json({
-      status: 400,
-      message: "Dados incorretos",
-      errors: { id: "Um ou mais dados foram enviados incorretamente" },
-    });
+    const updated = await agentesRepository.updateAgent(id, req.body);
+    
+    if (!updated) {
+      return res.status(404).json({
+        status: 404,
+        message: "Agente não encontrado"
+      });
+    }
+
+    res.status(200).json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  if (!nome || nome.trim() === "") {
-    return res.status(400).json({
-      status: 400,
-      message: "Nome incorreto",
-      errors: { id: "Nome invalido ou vazio" },
-    });
-  }
-
-  if (!dataDeIncorporacao || dataDeIncorporacao.trim() === "") {
-    return res.status(400).json({
-      status: 400,
-      message: "DataDeIncorporacao incorreto",
-      errors: { id: "dataDeIncorporacao invalido ou vazio" },
-    });
-  }
-  if (!cargo || cargo.trim() === "") {
-    return res.status(400).json({
-      status: 400,
-      message: "Cargo incorreto",
-      errors: { id: "Cargo invalido ou vazio" },
-    });
-  }
-
-  const newAgent = {
-    nome,
-    dataDeIncorporacao,
-    cargo,
-  };
-
-  const updated = await agentesRepository.updateAgents(id, newAgent);
-
-  if (!updated) {
-    return res.status(404).json({
-      status: 404,
-      message: "Agente não encontrado",
-      errors: { id: "O id do agente fornecido é invalido" },
-    });
-  };
-
-  res.status(200).json(updated);
 }
+
 
 async function partialUpdate(req, res) {
 

@@ -55,7 +55,7 @@ routes.get('/', casosController.getAllCasos);
  *       500:
  *         description: Erro interno do servidor
  */
-routes.get('/:caso_id/agente', casosController.getAgenteAssocitateToCase);
+routes.get('/:caso_id/agente', casosController.getAgenteAssociateToCase);
 
 /**
  * @openapi
@@ -182,7 +182,7 @@ routes.put('/:caso_id', casosController.updateCase);
  *       500:
  *         description: Erro interno do servidor
  */
-routes.patch('/:caso_id', casosController.parcialUpdateCase);
+routes.patch('/:caso_id', casosController.partialUpdateCase);
 
 /**
  * @openapi

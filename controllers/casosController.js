@@ -4,16 +4,13 @@ const agentesRepository = require("../repositories/agentesRepository");
 const Joi = require("joi");
 
 async function getAllCasos(req, res) {
-  const { status, agente_id, search } = req.query;
+  const { status, search } = req.query;
   let casos = await casosRepository.findAll();
 
   if (status) {
     casos = casos.filter((c) => c.status === status);
   }
 
-  if (agente_id) {
-    casos = casos.filter((c) => c.agente_id === agente_id);
-  }
 
   if (search) {
     casos = casos.filter(
@@ -27,7 +24,7 @@ async function getAllCasos(req, res) {
 }
 
 async function getCasoById(req, res) {
-  const { agente_id } = req.query;
+
 
   const { caso_id } = req.params;
 
@@ -42,16 +39,10 @@ async function getCasoById(req, res) {
     });
   };
 
-
-
-  if (agente_id) {
-    caso = caso.id.filter((c) => c.agente_id === agente_id);
-  }
-
   res.status(200).json(caso);
 }
 
-async function getAgenteAssocitateToCase(req, res) {
+async function getAgenteAssociateToCase(req, res) {
   const { caso_id } = req.params;
 
 
@@ -182,10 +173,17 @@ async function updateCase(req, res) {
   res.status(200).json(updated);
 }
 
-async function parcialUpdateCase(req, res) {
+async function  partialUpdateCase(req, res) {
   const { caso_id } = req.params;
 
   const fields = req.body;
+
+  if (req.body.id && req.body.id !== id) {
+  return res.status(400).json({
+    status: 400,
+    message: "Não é permitido alterar o campo 'id'.",
+  });
+}
 
   const existingCase = await casosRepository.findCaseById(caso_id);
   if (!existingCase) {
@@ -197,6 +195,8 @@ async function parcialUpdateCase(req, res) {
       },
     });
   };
+
+
 
 
   if (
@@ -255,7 +255,7 @@ module.exports = {
   getCasoById,
   createCase,
   updateCase,
-  parcialUpdateCase,
+   partialUpdateCase,
   deleteCase,
-  getAgenteAssocitateToCase,
+  getAgenteAssociateToCase,
 };

@@ -11,7 +11,7 @@ const agentesRoute = require('./routes/agentesRoutes')
 
 require('dotenv').config();
 
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

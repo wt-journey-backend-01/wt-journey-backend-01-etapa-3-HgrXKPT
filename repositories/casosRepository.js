@@ -21,22 +21,25 @@ async function createCase(caseData){
 
 }
 
- function updateCase(id, caseData){
+ async function updateCase(id, caseData){
 
+const [updatedCase] = await db('casos')
+      .where({ id })
+      .update(caseData)
+      .returning('*');
 
-    return db('casos')
-        .where({ id })
-        .update(caseData)
-        .returning('*'); // Retorna todas as colunas do registro atualizado
-    
+     if (!updatedCase) {
+      throw new Error('Caso não encontrado');
+    }
+  return updatedCase;
     
 }
-function deleteCase(id){
+async function deleteCase(id){
 
-    return db('casos')
-        .where({ id })
-        .del()
-        .returning('*'); // Retorna todas as colunas do registro deletado
+    const deletedCount = await db('casos')
+      .where({ id })
+      .del();
+  return deletedCount; // Retorna o número de registros deletados
 
 }
 

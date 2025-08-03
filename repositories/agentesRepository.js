@@ -28,7 +28,11 @@ async function updateAgents(id,agenteData){
 
 async function deleteAgent(id){
     
-    return await db('agentes').where({ id }).del();
+    const deletedCount = await db('agentes')
+      .where({ id })
+      .del();
+  return deletedCount; // Retorna o número de registros deletados
+
 
     
 }
