@@ -16,11 +16,8 @@ const db = require('../db/db');
 
 async function createCase(caseData){
 
-
-
-    return await db('casos')
-        .insert(caseData)
-        .returning('*'); // Retorna todas as colunas do registro criado
+    const [createdCase] = await db('casos').insert(caseData).returning('*');
+    return createdCase;
 
 }
 

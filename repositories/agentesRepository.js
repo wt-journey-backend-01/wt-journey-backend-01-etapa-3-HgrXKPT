@@ -22,8 +22,8 @@ async function findAgentById(id){
   }
 
 async function updateAgents(id,agenteData){
-
-    return db('agentes').where({ id }).update(agenteData).returning('*');
+    const [updatedAgent] = await db('agentes').where({ id }).update(agenteData).returning('*');
+    return updatedAgent;
 }
 
 async function deleteAgent(id){

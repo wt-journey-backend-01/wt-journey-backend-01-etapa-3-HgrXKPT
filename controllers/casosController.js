@@ -213,7 +213,7 @@ async function parcialUpdateCase(req, res) {
   }
 
   if (fields.agente_id) {
-    const agenteExiste = agentesRepository
+    const agenteExiste = await agentesRepository
       .findAll()
       .some((agente) => agente.id === fields.agente_id);
 
