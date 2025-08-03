@@ -1,164 +1,59 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 8 créditos restantes para usar o sistema de feedback AI.
+Você tem 7 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para HgrXKPT:
 
 Nota final: **0.0/100**
 
-# Feedback para você, HgrXKPT! 🚓✨
+# Feedback para HgrXKPT 🚔✨
 
-Olá! Primeiro, quero te parabenizar pela coragem e esforço em montar essa API para o Departamento de Polícia! 👏 É um desafio e tanto, e você já mostrou ter uma boa noção da estrutura básica do Express, uso de middlewares e organização em arquivos separados. Além disso, você conseguiu implementar validações de payload e tratamento de erros para os formatos incorretos — isso é super importante para garantir a robustez da sua API! 🎯
+Olá, HgrXKPT! Primeiro, quero parabenizar pelo empenho em construir uma API REST para o Departamento de Polícia usando Node.js e Express.js! 🎉 A organização do seu código em rotas, controllers e repositories mostra que você já entende a importância de modularizar o projeto — isso é essencial para projetos escaláveis e de manutenção facilitada.
 
-Também notei que você tentou implementar filtros, ordenação e mensagens de erro customizadas, o que é um baita diferencial! Mesmo que ainda não estejam funcionando 100%, o esforço para ir além do básico é muito válido! 🚀
-
----
-
-## Vamos analisar juntos alguns pontos que precisam de atenção para destravar o seu projeto e fazer sua API brilhar! 💡
+Além disso, você já aplicou validações e tratamento de erros, e isso é um ótimo sinal de que está preocupado com a qualidade da API e com a experiência do cliente que vai consumir seus endpoints. Também notei que você usou o **Joi** para validação, o que é uma ótima prática! 👏
 
 ---
 
-### 1. Estrutura do Projeto: Onde está o arquivo `project_structure.txt`? 📁
-
-Vi que o arquivo `project_structure.txt` não está presente no seu repositório. Isso pode indicar que a estrutura do seu projeto não está exatamente como o esperado.
-
-A organização é fundamental para facilitar a manutenção e o entendimento do código, principalmente em projetos com múltiplos recursos, como agentes e casos.
-
-A estrutura esperada é esta aqui:
-
-```
-📦 SEU-REPOSITÓRIO
-│
-├── package.json
-├── server.js
-├── .env (opcional para centralizar configurações)
-│
-├── routes/
-│   ├── agentesRoutes.js
-│   └── casosRoutes.js
-│
-├── controllers/
-│   ├── agentesController.js
-│   └── casosController.js
-│
-├── repositories/
-│   ├── agentesRepository.js
-│   └── casosRepository.js
-│
-├── docs/
-│   └── swagger.js
-│
-└── utils/
-    └── errorHandler.js
-```
-
-**Por que isso importa?**  
-Se as pastas e arquivos não estiverem organizados assim, o servidor pode não conseguir encontrar as rotas, controladores ou repositórios, o que impacta diretamente no funcionamento dos endpoints.
+## Vamos destrinchar juntos os pontos que podem ser melhorados para que sua API funcione 100% e você avance com confiança! 🚀
 
 ---
 
-### 2. Endpoints e Controladores: Eles estão implementados corretamente? 🤔
+## 1. Estrutura de Diretórios e Organização do Projeto 🗂️
 
-Eu vi que você tem os arquivos de rotas (`routes/agentesRoutes.js` e `routes/casosRoutes.js`) configurados com as rotas e apontando para os respectivos controladores. Isso é ótimo!
+Sua estrutura de arquivos está alinhada com o esperado, o que é ótimo! Você tem:
 
-No entanto, ao analisar os controladores, percebi que:
+- `routes/` com os arquivos `agentesRoutes.js` e `casosRoutes.js`
+- `controllers/` com os arquivos `agentesController.js` e `casosController.js`
+- `repositories/` com `agentesRepository.js` e `casosRepository.js`
+- `server.js` configurando o app e as rotas
+- `utils/errorHandler.js` para tratamento centralizado de erros
+- `docs/swagger.js` para documentação
 
-- No arquivo `controllers/casosController.js`, a função `getCasoById` tem um trecho problemático:
-
-```js
-async function getCasoById(req, res) {
-  const { agente_id } = req.query;
-  const { caso_id } = req.params;
-
-  let caso = await casosRepository.findCaseById(caso_id);
-
-  if (!caso) {
-    return res.status(404).json({
-      status: 404,
-      message: "Caso inexistente",
-      errors: {
-        caso_id: "O caso não foi encontrado" },
-    });
-  };
-
-  if (agente_id) {
-    caso = caso.id.filter((c) => c.agente_id === agente_id);
-  }
-
-  res.status(200).json(caso);
-}
-```
-
-Aqui, a linha `caso = caso.id.filter(...)` não faz sentido, pois `caso` é um objeto único retornado do banco, e `caso.id` é provavelmente uma string ou número, que não tem o método `.filter()`. Isso vai gerar erro em tempo de execução.
-
-**Como corrigir?**  
-Se a ideia era filtrar casos por `agente_id`, isso deve acontecer no endpoint de listagem (`getAllCasos`), e não ao buscar um caso específico por ID. Então, você pode remover esse bloco do `getCasoById`:
-
-```js
-// Remova este bloco:
-if (agente_id) {
-  caso = caso.id.filter((c) => c.agente_id === agente_id);
-}
-```
+**Porém, um ponto importante:** percebi que seu projeto contém um arquivo `.env` na raiz, e isso gerou penalidade (provavelmente porque não era permitido ou não foi configurado corretamente para o desafio). Se o uso do `.env` não faz parte do requisito, recomendo removê-lo para evitar problemas futuros.
 
 ---
 
-### 3. Repositórios: Atenção ao retorno das funções de update e delete! ⚠️
+## 2. Sobre os Endpoints e Funcionalidades Fundamentais da API
 
-No arquivo `repositories/casosRepository.js`, as funções `updateCase` e `deleteCase` estão assim:
+### O que está faltando ou precisa ser ajustado para que os endpoints funcionem corretamente?
 
-```js
-function updateCase(id, caseData){
-  return db('casos')
-      .where({ id })
-      .update(caseData)
-      .returning('*'); // Retorna todas as colunas do registro atualizado
-}
+### a) Implementação e nomeação correta dos métodos nos controllers e repositórios
 
-function deleteCase(id){
-  return db('casos')
-      .where({ id })
-      .del()
-      .returning('*'); // Retorna todas as colunas do registro deletado
-}
-```
-
-O problema aqui é que o método `.returning('*')` do Knex retorna um array (mesmo que com um único elemento), mas no seu controlador você está esperando um objeto, como em:
+- No seu `agentesController.js`, na função `partialUpdate`, você chama o repositório assim:
 
 ```js
-const updated = await casosRepository.updateCase(caso_id, value);
-res.status(200).json(updated);
+const updated = await agentesRepository.updateAgents(id, fields);
 ```
 
-Se `updated` for um array, isso pode causar problemas na resposta.
+Note que o nome do método no repository é `updateAgents` (com "s" no final), mas no controller `updateAgent` (sem "s"). Isso pode causar confusão e até erros se não estiver consistente.
 
-**Solução:**  
-Você deve tratar o retorno para pegar o primeiro elemento do array, assim como fez no `createCase`, por exemplo:
-
-```js
-async function updateCase(id, caseData){
-  const [updatedCase] = await db('casos')
-      .where({ id })
-      .update(caseData)
-      .returning('*');
-  return updatedCase;
-}
-
-async function deleteCase(id){
-  const deletedCount = await db('casos')
-      .where({ id })
-      .del();
-  return deletedCount; // Retorna o número de registros deletados
-}
-```
-
-Note que para o delete, o `.del()` não retorna os dados deletados, mas sim a contagem de linhas removidas. Assim, no seu controlador, você pode verificar se o retorno é maior que zero para saber se deletou algo.
+Recomendo padronizar para `updateAgent` (singular), pois você está atualizando um agente por vez.
 
 ---
 
-### 4. Validação e uso correto do campo `id` nos updates 🛠️
+### b) Falhas no endpoint PATCH `/agentes/:id`
 
-No controlador `agentesController.js`, você tem uma validação para impedir alteração do campo `id` no update, o que é ótimo para manter a integridade dos dados:
+Na função `partialUpdate` do controller, você tem:
 
 ```js
 if (req.body.id && req.body.id !== id) {
@@ -169,75 +64,232 @@ if (req.body.id && req.body.id !== id) {
 }
 ```
 
-Porém, essa verificação está ausente em algumas funções, por exemplo no `parcialUpdateCase` do `casosController.js`. Recomendo adicionar a mesma lógica para evitar que o `id` seja alterado via PATCH.
+Isso está correto, mas o problema maior está na chamada do repositório que, como falei, pode estar com nome inconsistente.
+
+Além disso, não vi validação para o formato da data `dataDeIncorporacao` no PATCH, diferente do que você fez no POST e PUT. Isso pode gerar dados inválidos na sua base.
 
 ---
 
-### 5. Uso correto do `.env` e porta do servidor 🌐
+### c) Endpoints de Casos (`/casos`) — Falta de filtros importantes e inconsistência na validação
 
-No seu `server.js`, você faz:
+No seu controller `casosController.js`, você implementou filtros para `status` e `search`, porém não há filtro para agente responsável (exemplo: filtrar casos pelo `agente_id`), que era um requisito bônus importante.
+
+Além disso, no método `partialUpdateCase`, você tem um erro de variável na validação do campo `id`:
 
 ```js
-require('dotenv').config();
-const port = process.env.PORT;
+if (req.body.id && req.body.id !== id) {
+  return res.status(400).json({
+    status: 400,
+    message: "Não é permitido alterar o campo 'id'.",
+  });
+}
 ```
 
-Mas não vi o arquivo `.env` no seu repositório, e foi detectado que o arquivo `.env` está na raiz (o que é correto), porém, se ele não existir, o `port` será `undefined`, e seu servidor não vai rodar.
-
-**Sugestão:**  
-Defina uma porta padrão para o servidor caso a variável de ambiente não esteja definida:
+Aqui, a variável `id` não está definida — o correto seria usar `caso_id` (que vem de `req.params`), assim:
 
 ```js
-const port = process.env.PORT || 3000;
+if (req.body.id && req.body.id !== caso_id) {
+  return res.status(400).json({
+    status: 400,
+    message: "Não é permitido alterar o campo 'id'.",
+  });
+}
 ```
 
-Assim, seu servidor sempre terá uma porta para escutar, facilitando testes locais.
+Esse tipo de erro impede que a validação funcione e pode causar falhas em atualizações parciais.
 
 ---
 
-### 6. Pequenos detalhes que podem impactar a funcionalidade 🚧
+### d) Validação de existência de agente no PATCH `/casos/:caso_id`
 
-- No `casosController.js`, na função `getAgenteAssocitateToCase`, o nome da função está com um pequeno erro de digitação: `getAgenteAssocitateToCase` deveria ser `getAgenteAssociateToCase` (ou similar). Embora isso não quebre o código, é uma boa prática manter nomes claros e corretos para evitar confusões futuras.
+Na sua função `partialUpdateCase`, para verificar se o agente existe, você faz:
 
-- No `repositories/agentesRepository.js`, o método `deleteAgent` retorna diretamente o resultado de `.del()`, que é um número (quantidade deletada). No seu controlador, você verifica se esse valor existe para decidir se retornará 404 ou 204, o que está correto.
+```js
+const agenteExiste = await agentesRepository
+  .findAll()
+  .some((agente) => agente.id === fields.agente_id);
+```
+
+Aqui, você está chamando `findAll()` que retorna uma Promise, mas não está usando `await` corretamente para esperar a resolução antes de usar `.some()`. Na verdade, `findAll()` é async, então você precisa aguardar o resultado antes de usar `.some()`.
+
+O correto seria:
+
+```js
+const agentes = await agentesRepository.findAll();
+const agenteExiste = agentes.some((agente) => agente.id === fields.agente_id);
+```
+
+Sem isso, seu código pode não validar corretamente e deixar passar agentes inexistentes.
 
 ---
 
-## Recursos que vão te ajudar a aprimorar seu projeto 📚
+### e) Tratamento de erros e mensagens mais consistentes
 
-- Para entender melhor a estrutura de rotas e controllers no Express, recomendo muito este vídeo:  
-  https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH  
-  Ele explica como organizar seu projeto usando MVC, o que vai te ajudar a manter tudo limpo e funcional.
+Você fez um bom trabalho incluindo mensagens customizadas para erros 400 e 404, mas em alguns lugares:
 
-- Para aprofundar no uso correto dos métodos HTTP e status codes, este vídeo é excelente:  
-  https://youtu.be/RSZHvQomeKE  
-  Ele vai te ajudar a entender quando usar cada status code e como estruturar suas respostas.
+- No `deleteAgent`, a mensagem de erro para agente não encontrado está assim:
 
-- Para aprender a manipular arrays e objetos corretamente em JavaScript, fundamental para filtrar e buscar dados, veja:  
-  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
+```js
+return res.status(404).json({
+  status: 404,
+  message: "Parâmetros inválidos",
+  errors: {
+    id: "O agente não foi encontrado",
+  },
+});
+```
 
-- Para validar dados e criar respostas de erro customizadas, este tutorial é muito esclarecedor:  
+A mensagem `"Parâmetros inválidos"` não é a mais adequada para um recurso não encontrado. Seria mais claro usar `"Agente não encontrado"`, para manter a consistência e facilitar o entendimento por quem consome a API.
+
+---
+
+### f) Uso de banco de dados (Knex) com promessa de dados em memória
+
+No enunciado, era esperado que os dados fossem armazenados **em memória**, usando arrays na camada de `repositories`.
+
+Porém, no seu código, você está usando o Knex para acessar um banco de dados PostgreSQL:
+
+```js
+const db = require('../db/db');
+
+async function findAll(){
+    return await db('agentes').select('*');
+}
+```
+
+Isso é uma divergência importante! O desafio pedia armazenamento em memória, e o uso de banco de dados não foi solicitado nem esperado.
+
+Além disso, o uso do banco implica que você precisa ter a estrutura do banco configurada e rodando, o que pode não estar acontecendo no ambiente do avaliador e pode causar falhas.
+
+Se o objetivo era usar arrays em memória, você deve modificar seus repositories para manipular arrays locais, por exemplo:
+
+```js
+let agentes = [];
+
+async function findAll() {
+  return agentes;
+}
+
+async function createAgent(agentData) {
+  const newAgent = { id: generateId(), ...agentData };
+  agentes.push(newAgent);
+  return newAgent;
+}
+// e assim por diante...
+```
+
+Isso vai garantir que a API funcione independente de banco de dados externo.
+
+---
+
+## 3. Pontos Extras que Você Mandou Bem! 🎉
+
+- Uso do Joi para validações mais robustas no PUT e PATCH.
+- Implementação de filtros simples para agentes e casos (como filtro por cargo e status).
+- Tratamento centralizado de erros com middleware `errorHandler`.
+- Documentação Swagger configurada e integrada ao servidor.
+- Boas mensagens de erro customizadas, o que ajuda muito na usabilidade da API.
+
+---
+
+## 4. Recomendações de Aprendizado para Você 💡
+
+Para te ajudar a corrigir e aprimorar seu projeto, recomendo fortemente os seguintes recursos:
+
+- Para entender melhor a estrutura e organização de rotas e controllers no Express.js:  
+  https://expressjs.com/pt-br/guide/routing.html  
+  (Isso vai te ajudar a garantir que seus endpoints estejam bem definidos e funcionando.)
+
+- Para reforçar conceitos de API REST e status HTTP corretos:  
+  https://youtu.be/RSZHvQomeKE
+
+- Para validar dados usando Joi e entender como tratar erros de validação:  
   https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_
 
----
+- Para manipulação de arrays em memória (fundamental para o requisito do desafio):  
+  https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
 
-## Resumo rápido para você focar nos próximos passos 🚦
-
-- **Organize seu projeto** conforme a estrutura esperada, garantindo que todos os arquivos estejam onde devem estar.  
-- **Corrija o uso incorreto de métodos de array** no controlador `getCasoById` (remova o `.filter()` aplicado a um objeto).  
-- **Ajuste os repositórios para que retornem objetos únicos** nos updates e tratem corretamente o retorno do delete.  
-- **Implemente validação para impedir alteração do campo `id`** também na atualização parcial dos casos.  
-- **Configure uma porta padrão no `server.js`** para evitar problemas na inicialização do servidor.  
-- **Revise nomes de funções para evitar erros de digitação** e manter o código limpo.  
-- Continue aprimorando as mensagens de erro customizadas e filtros para melhorar a experiência da API! 🚀
+- Para entender melhor o fluxo de requisição e resposta no Express.js:  
+  https://youtu.be/Bn8gcSQH-bc?si=Df4htGoVrV0NR7ri
 
 ---
 
-HgrXKPT, você está no caminho certo! 💪 Cada ajuste que você fizer vai destravar funcionalidades importantes e fazer sua API funcionar como um relógio. Não desanime com os obstáculos, pois são eles que fazem a gente aprender de verdade! Estou aqui torcendo por você e disponível para ajudar sempre que precisar. 🌟
+## 5. Resumo dos Pontos para Focar e Ajustar ⚙️
 
-Bora codar e fazer essa API acontecer! 👮‍♂️👮‍♀️💙
+- [ ] **Armazenar dados em memória (arrays) nos repositories**, e não usar banco de dados com Knex, para atender ao requisito do desafio.
 
-Abraços do seu Code Buddy! 🤖✨
+- [ ] Corrigir a variável incorreta `id` para `caso_id` no método `partialUpdateCase` do controller de casos.
+
+- [ ] Ajustar a chamada do método `updateAgents` para `updateAgent` para manter consistência e evitar erros.
+
+- [ ] Corrigir a validação de existência de agente no `partialUpdateCase` para aguardar a Promise antes de usar `.some()`.
+
+- [ ] Revisar e padronizar as mensagens de erro para serem mais claras e consistentes (ex: 404 para "Agente não encontrado").
+
+- [ ] Implementar filtros extras para casos, como filtro por `agente_id`, para cumprir os critérios bônus.
+
+- [ ] Remover o arquivo `.env` se não for permitido no desafio ou configurar corretamente para evitar penalidades.
+
+---
+
+## Finalizando...
+
+Você está no caminho certo, HgrXKPT! 🚀 A modularização do seu código, o uso de validação e tratamento de erros mostram que você já domina conceitos importantes para construir APIs robustas. Os ajustes que sugeri são pontuais e, uma vez feitos, vão destravar toda a funcionalidade esperada.
+
+Continue praticando, revisando seu código e testando cada endpoint com carinho. A prática leva à perfeição! Estou aqui torcendo pelo seu sucesso! 💪✨
+
+Se precisar de ajuda para entender algum ponto específico, só chamar! 😉
+
+Abraços e bons códigos! 👮‍♂️👩‍💻
+
+---
+
+# Código exemplo para armazenamento em memória no repository de agentes (exemplo básico):
+
+```js
+let agentes = [];
+let nextId = 1;
+
+async function findAll() {
+  return agentes;
+}
+
+async function findAgentById(id) {
+  return agentes.find((a) => a.id === Number(id));
+}
+
+async function createAgent(agentData) {
+  const newAgent = { id: nextId++, ...agentData };
+  agentes.push(newAgent);
+  return newAgent;
+}
+
+async function updateAgent(id, agentData) {
+  const index = agentes.findIndex((a) => a.id === Number(id));
+  if (index === -1) return null;
+  agentes[index] = { ...agentes[index], ...agentData };
+  return agentes[index];
+}
+
+async function deleteAgent(id) {
+  const index = agentes.findIndex((a) => a.id === Number(id));
+  if (index === -1) return 0;
+  agentes.splice(index, 1);
+  return 1;
+}
+
+module.exports = {
+  findAll,
+  findAgentById,
+  createAgent,
+  updateAgent,
+  deleteAgent,
+};
+```
+
+---
+
+Continue firme! 💥 Você vai conseguir!
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
