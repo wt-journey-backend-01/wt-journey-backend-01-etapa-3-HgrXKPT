@@ -9,8 +9,13 @@ const db = require('../db/db');
 }
 
  async function findCaseById(id){
-    
-    return await db('casos').where({id}).first();
+  
+    const caso = await db('casos').where({id}).first();
+    // Verifica se o caso foi encontrado
+    if(!caso){
+      throw new Error('Caso não encontrado');
+    }
+    return caso
    
 
 }
@@ -23,17 +28,21 @@ async function createCase(caseData){
 }
 
  async function updateCase(id, caseData){
-
-const [updatedCase] = await db('casos')
+  
+  try{  
+    const updated = {
+    ...caseData
+  }
+    const [updatedCase] = await db('casos')
       .where({ id })
-      .update(caseData)
+      .update(updated)
       .returning('*');
 
-     if (!updatedCase) {
-      throw new Error('Caso não encontrado');
-    }
-  return updatedCase;
-    
+      return updatedCase;
+
+  }catch (error) {
+    throw new Error('Erro ao atualizar caso: ' + error.message);
+  }
 }
 async function deleteCase(id){
 

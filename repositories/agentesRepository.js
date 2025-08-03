@@ -6,18 +6,25 @@ async function findAll(){
 }
 
 async function findAgentById(id){
-
-    return await db('agentes').where({id}).first();
+    const agente = await db('agentes').where({id}).first();
+    if(!agente){
+        throw new Error('Agente não encontrado');
+    }
+    return agente
 
 }
 
   async function createAgent(agenteData){
-
-      const [createdAgent] = await db('agentes')
+    try{
+        const [createdAgent] = await db('agentes')
               .insert(agenteData)
               .returning('*'); // Retorna todas as colunas do registro criado
 
           return createdAgent;
+    }catch(dbError){
+        throw new Error('Erro ao criar agente: ' + dbError.message);
+    }
+      
     
   }
 

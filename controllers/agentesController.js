@@ -1,11 +1,9 @@
 const agentesRepository = require("../repositories/agentesRepository");
 const { parseISO, isValid, isFuture } = require("date-fns");
-const Joi = require('joi');
-
-
+const Joi = require("joi");
 
 async function findAll(req, res) {
-  const { cargo, agente_id,sort } = req.query;
+  const { cargo, sort } = req.query;
 
   let agentes = await agentesRepository.findAll();
 
@@ -13,10 +11,6 @@ async function findAll(req, res) {
     agentes = agentes.filter((a) =>
       a.cargo.toLowerCase().includes(cargo.toLowerCase())
     );
-  }
-
-  if (agente_id) {
-    casos = casos.filter((c) => c.agente_id === agente_id);
   }
 
   if (sort === "dataDeIncorporacao") {
@@ -35,11 +29,12 @@ async function findAll(req, res) {
 }
 
 async function findById(req, res) {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  const agente = await agentesRepository.findAgentById(id);
-
-  if (!agente) {
+    const agente = await agentesRepository.findAgentById(id);
+    res.status(200).json(agente);
+  } catch (error) {
     return res.status(404).json({
       status: 404,
       message: "Agente não encontrado",
@@ -47,71 +42,80 @@ async function findById(req, res) {
         id: "Nenhum agente encontrado com o ID fornecido",
       },
     });
-  };
-
-  res.status(200).json(agente);
+  }
 }
 async function addAgente(req, res) {
-  const { nome, dataDeIncorporacao, cargo } = req.body;
+  const agentSchema = Joi.object({
+    nome: Joi.string().trim().min(1).required(),
+    dataDeIncorporacao: Joi.date().iso().required(),
+    cargo: Joi.string().trim().min(1).required(),
+  });
 
-  if (!nome || !dataDeIncorporacao || !cargo) {
+  const { error, value } = agentSchema.validate(req.body);
+
+  if (error) {
+    const errorDetails = error.details.reduce((acc, curr) => {
+      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
+      return acc;
+    }, {});
+
     return res.status(400).json({
       status: 400,
-      message: `Parâmetros inválidos`,
-      errors: {
-        nome: !nome ? "Campo obrigatório não informado" : undefined,
-        dataDeIncorporacao: !dataDeIncorporacao
-          ? "Campo obrigatório não informado"
-          : undefined,
-        cargo: !cargo ? "Campo obrigatório não informado" : undefined,
-      },
+      message: "Dados inválidos",
+      errors: errorDetails
     });
   }
 
-  validateDate(dataDeIncorporacao);
 
   const newAgent = {
-    nome,
-    dataDeIncorporacao,
-    cargo,
+    nome: value.nome,
+    dataDeIncorporacao: value.dataDeIncorporacao,
+    cargo: value.cargo,
   };
+
   const agent = await agentesRepository.createAgent(newAgent);
   res.status(201).json(agent);
 }
 
 async function updateAgent(req, res) {
-
   const agentSchema = Joi.object({
-  nome: Joi.string().required(),
-  dataDeIncorporacao: Joi.date().iso().required(),
-  cargo: Joi.string().required()
-});
-  try{
-  const { id } = req.params;
+    nome: Joi.string().trim().min(1).required(),
+    dataDeIncorporacao: Joi.date().iso().max("now").required(),
+    cargo: Joi.string().trim().min(1).required(),
+  });
+  try {
+    const { id } = req.params;
 
-
-  const { error } = agentSchema.validate(req.body);
-
-  if (req.body.id && req.body.id !== id) {
-    return res.status(400).json({
-      status: 400,
-      message: "Não é permitido alterar o campo 'id'.",
-    });
-  }
- if (error) {
+    if (req.body.id && req.body.id !== id) {
       return res.status(400).json({
         status: 400,
-        message: "Dados inválidos",
-        errors: error.details
+        message: "Não é permitido alterar o campo 'id'.",
       });
     }
 
-    const updated = await agentesRepository.updateAgent(id, req.body);
+    const { error, value } = agentSchema.validate(req.body);
+
     
+    if (error) {
+      return res.status(400).json({
+        status: 400,
+        message: "Dados inválidos",
+        errors: error.details,
+      });
+    }
+
+    const toUpdateAgent = {
+      nome: value.nome,
+      dataDeIncorporacao: value.dataDeIncorporacao,
+      cargo: value.cargo,
+    }
+
+    const updated = await agentesRepository.updateAgent(id, toUpdateAgent);
+
     if (!updated) {
       return res.status(404).json({
         status: 404,
-        message: "Agente não encontrado"
+        message: "Agente não encontrado",
       });
     }
 
@@ -121,21 +125,25 @@ async function updateAgent(req, res) {
   }
 }
 
-
 async function partialUpdate(req, res) {
-
   const partialSchema = Joi.object({
     nome: Joi.string().trim().min(1).optional(),
-    dataDeIncorporacao: Joi.date().iso().optional(),
-    cargo: Joi.string().trim().min(1).optional()
+    dataDeIncorporacao: Joi.date().iso().max("now").optional(),
+    cargo: Joi.string().trim().min(1).optional(),
   }).min(1);
 
   const { id } = req.params;
+
+  if (req.body.id && req.body.id !== id) {
+    return res.status(400).json({
+      status: 400,
+      message: "Não é permitido alterar o campo 'id'.",
+    });
+  }
+
   const { error, value } = partialSchema.validate(req.body);
 
-
-
-   if (error) {
+  if (error) {
     return res.status(400).json({
       status: 400,
       message: "Payload incorreto",
@@ -145,77 +153,51 @@ async function partialUpdate(req, res) {
     });
   }
 
-  if (req.body.id && req.body.id !== id) {
-    return res.status(400).json({
-      status: 400,
-      message: "Não é permitido alterar o campo 'id'.",
-    });
-  }
+  
 
   const agente = await agentesRepository.findAgentById(id);
+
   if (!agente) {
     return res.status(404).json({
-      status: 404,
-      message: "Agente não encontrado",
-      errors: {
-        id: "O agente não foi encontrado"
-      }
-    });
-  };
-
-  const fields = {};
-  if (value.nome !== undefined) fields.nome = value.nome;
-  if (value.dataDeIncorporacao !== undefined) fields.dataDeIncorporacao = value.dataDeIncorporacao;
-  if (value.cargo !== undefined) fields.cargo = value.cargo;
-
-  const updated = await agentesRepository.updateAgents(id, fields);
-
-  res.status(200).json(updated);
-}
-
-async function deleteAgent(req, res) {
-  const { id } = req.params;
-
-
-  const removed = await agentesRepository.deleteAgent(id);
-
-  if (!removed) {
-        return res.status(404).json({
       status: 404,
       message: "Agente não encontrado",
       errors: {
         id: "O agente não foi encontrado",
       },
     });
+  }
+
+  const toUpdateAgent = {
+    nome: value.nome || agente.nome,
+    dataDeIncorporacao: value.dataDeIncorporacao || agente.dataDeIncorporacao,
+    cargo: value.cargo || agente.cargo,
   };
+ 
+
+  const updated = await agentesRepository.updateAgent(id, toUpdateAgent);
+
+  res.status(200).json(updated);
+}
+
+async function deleteAgent(req, res) {
+  const { id } = req.params;
+  
+  const removed = await agentesRepository.deleteAgent(id);
+
+  if (!removed) {
+    return res.status(404).json({
+      status: 404,
+      message: "Agente não encontrado",
+      errors: {
+        id: "O agente não foi encontrado",
+      },
+    });
+  }
 
   res.status(204).send();
 }
 
-function validateDate(dateString){
 
-  const data = parseISO(dataDeIncorporacao);
-  if (!isValid(data)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Data inválida",
-      errors: {
-        dataDeIncorporacao: "Formato de data inválido, use YYYY-MM-DD",
-      },
-    });
-  }
-
-  if (isFuture(data)) {
-    return res.status(400).json({
-      status: 400,
-      message: "Data inválida",
-      errors: {
-        dataDeIncorporacao: "Data de incorporação não pode ser no futuro",
-      },
-    });
-  }
-
-}
 
 module.exports = {
   findAll,
