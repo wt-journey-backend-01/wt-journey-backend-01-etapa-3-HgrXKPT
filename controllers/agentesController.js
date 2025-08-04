@@ -51,7 +51,17 @@ async function addAgente(req, res) {
 
   const agent = await agentesRepository.createAgent(value);
 
-  return res.status(201).json(agent);
+  return res.status(201).json({
+      status: 201,
+      message: "Agente criado com sucesso",
+      data: {
+        id: agent.id,
+        nome: agent.nome,
+        dataDeIncorporacao: agent.dataDeIncorporacao,
+        cargo: agent.cargo
+      }
+    });
+    
 
   }catch (error) {
     return res.status(500).json({
