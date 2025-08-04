@@ -47,6 +47,9 @@ async function getAgenteAssociateToCase(req, res) {
   try{
     const { caso_id } = req.params;
     const caso = await casosRepository.findCaseById(caso_id);
+    if (!caso) {
+    return res.status(404).json({ message: "Caso não encontrado" });
+  }
     const agente = await agentesRepository.findAgentById(caso.agente_id);
     res.status(200).json(agente);
 

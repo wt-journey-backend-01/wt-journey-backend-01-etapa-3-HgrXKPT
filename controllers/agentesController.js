@@ -171,9 +171,9 @@ async function partialUpdate(req, res) {
   }
 
   const toUpdateAgent = {
-    nome: value.nome || agente.nome,
-    dataDeIncorporacao: value.dataDeIncorporacao || agente.dataDeIncorporacao,
-    cargo: value.cargo || agente.cargo,
+    nome: value.nome ?? agente.nome,
+    dataDeIncorporacao: value.dataDeIncorporacao ?? agente.dataDeIncorporacao,
+    cargo: value.cargo ?? agente.cargo,
   };
  
 

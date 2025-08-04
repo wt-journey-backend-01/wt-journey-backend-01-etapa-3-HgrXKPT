@@ -1,30 +1,31 @@
 const db = require("../db/db");
 
 async function findAll(filters) {
-  try {
-    const agentes = db("agentes").select("*");
+
+    const query = db("agentes");
+
     if (filters.cargo) {
-      agentes.where("cargo", "like", `%${filters.cargo}%`);
+      query.where("cargo", "like", `%${filters.cargo}%`);
     }
 
     if (filters.sort === "dataDeIncorporacao") {
-      agentes.orderBy("dataDeIncorporacao", "asc");
+      query.orderBy("dataDeIncorporacao", "asc");
     } else if (filters.sort === "-dataDeIncorporacao") {
-      agentes.orderBy("dataDeIncorporacao", "desc");
+      query.orderBy("dataDeIncorporacao", "desc");
     }
+    const agentes = await query.select("*");
+    return agentes ;
 
-    return agentes;
-  } catch (dbError) {
-    throw new Error("Erro ao buscar agentes: " + dbError.message);
-  }
+
 }
 
 async function findAgentById(id) {
+
   const agente = await db("agentes").where({ id }).first();
   if (!agente) {
     throw new Error("Agente não encontrado");
   }
-  return agente;
+  return agente || null;
 }
 
 async function createAgent(agenteData) {

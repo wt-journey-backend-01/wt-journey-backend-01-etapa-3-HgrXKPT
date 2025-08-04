@@ -5,22 +5,23 @@ const db = require('../db/db');
 
  async function findAll(filters) {
   try{
-     const casos = await db('casos').select('*');
+     const query = db('casos');
 
     if(filters.status){
-      casos.where('status', filters.status);
+     query.where('status', filters.status);
     }
 
     if(filters.agente_id){
-      casos.where('agente_id', filters.agente_id);
+      query.where('agente_id', filters.agente_id);
     }
 
     if(filters.search){
-      casos.where(function() {
+      query.where(function() {
         this.where('titulo', 'like', `%${filters.search}%`)
             .orWhere('descricao', 'like', `%${filters.search}%`);
       });
     }
+    const casos = await query.select('*');
     return casos;
   }catch (error) {
     throw new Error('Erro ao buscar casos: ' + error.message);
@@ -30,12 +31,13 @@ const db = require('../db/db');
 
  async function findCaseById(id){
   
-    const caso = await db('casos').where({id}).first();
+    const query =  db('casos');
     // Verifica se o caso foi encontrado
     if(!caso){
       throw new Error('Caso não encontrado');
     }
-    return caso
+    const caso = await  query.where({ id }).first();
+    return caso || null;  
    
 
 }
