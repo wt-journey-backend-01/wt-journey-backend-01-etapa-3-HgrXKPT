@@ -65,7 +65,11 @@ async function addAgente(req, res) {
         }
       });
   }
-  return res.status(201).send(agent);
+  return res.status(201).json({
+      status: 201,
+      message: "Agente criado com sucesso",
+      data: agent
+    });
 
   }catch (error) {
     return res.status(500).json({
