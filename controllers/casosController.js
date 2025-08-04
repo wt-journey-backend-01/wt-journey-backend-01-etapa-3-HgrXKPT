@@ -120,7 +120,7 @@ try{
     }
   });
   
-}
+}}
 
 async function updateCase(req, res) {
   const updateSchema = Joi.object({
