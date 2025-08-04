@@ -2,9 +2,9 @@
 
 # 🧪 Relatório de Avaliação – Journey Levty Etapa 1 - HgrXKPT
 
-**Data:** 04/08/2025 21:07
+**Data:** 04/08/2025 21:24
 
-**Nota Final:** `24.18/100`
+**Nota Final:** `21.49/100`
 **Status:** ❌ Reprovado
 
 ---
@@ -55,7 +55,9 @@
 - Nenhum item bônus foi identificado. Tente adicionar mais estilo e complexidade ao seu código nas próximas tentativas!
 
 ## ❌ Problemas Detectados (Descontos de até 100 pontos)
-- Nenhuma infração grave foi detectada. Muito bom nesse aspecto!
+- Foram encontrados `1` problemas que acarretam descontos. Veja abaixo os testes penalizados:
+  - ⚠️ **Falhou no teste de penalidade**: `Validation: Consegue registrar agente com data de incorporação no futuro`
+    - **Correção sugerida**: **Penalidade:** Sua API permitiu o registro de um agente com uma `dataDeIncorporacao` no futuro. Datas de incorporação não devem ser futuras. Implemente uma validação para impedir isso.
 
 ---
 Continue praticando e caprichando no código. Cada detalhe conta! 💪
