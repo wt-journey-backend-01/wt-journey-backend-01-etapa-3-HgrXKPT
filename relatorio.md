@@ -1,212 +1,232 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 5 créditos restantes para usar o sistema de feedback AI.
+Você tem 4 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para HgrXKPT:
 
 Nota final: **24.2/100**
 
-# Feedback para HgrXKPT 🚨👮‍♂️
+# Feedback para você, HgrXKPT! 🚀👮‍♂️
 
-Olá, HgrXKPT! Que desafio bacana você encarou, construir uma API REST para um Departamento de Polícia é um baita exercício para aplicar Node.js e Express.js! 🚀 Antes de mais nada, parabéns por ter estruturado seu projeto com rotas, controllers e repositories, além de ter implementado validações com Joi e tratamento de erros. Isso mostra que você está no caminho certo para construir APIs robustas e organizadas. 🎉
-
----
-
-## O que você mandou bem! 👏
-
-- **Organização do código**: Você separou rotas, controllers e repositories, o que é fundamental para manter o projeto escalável e legível. Isso facilita muito a manutenção futura.
-- **Validação com Joi**: Seus controllers usam schemas Joi para validar os dados de entrada, o que é excelente para garantir a integridade dos dados e evitar bugs.
-- **Tratamento de erros**: Você customizou respostas de erro com mensagens claras e status HTTP coerentes, como 400 para dados inválidos e 404 para recursos não encontrados.
-- **Filtros e ordenação**: Implementou filtros por cargo e ordenação por data de incorporação para agentes, além de filtros em casos por status, agente e busca por palavras-chave. Isso é um bônus muito legal! 🌟
-- **Uso do Swagger para documentação**: Ter a documentação integrada com Swagger é um diferencial que facilita o uso da API e mostra profissionalismo.
+Olá! Primeiro, quero parabenizá-lo pelo esforço e pela estruturação do seu projeto! 🎉 Você organizou bem as pastas, modularizou seu código com controllers, repositories e rotas, e usou ferramentas importantes como Knex.js, Joi para validação e Swagger para documentação. Isso mostra que você está no caminho certo para construir uma API robusta e escalável. Além disso, percebo que você implementou filtros e buscas avançadas nos endpoints, o que é um baita diferencial! 🌟
 
 ---
 
-## Pontos para melhorar — vamos juntos destravar sua API! 🔍
+## Vamos destrinchar o que eu encontrei e como você pode evoluir! 🔍
 
-### 1. Problema fundamental: **Repositórios estão usando banco de dados, mas o desafio pediu armazenamento em memória**
+### 1. Organização da Estrutura de Diretórios - Está Quase Perfeita! 📁
 
-Ao analisar seus arquivos `agentesRepository.js` e `casosRepository.js`, percebi que você está usando consultas SQL via `knex` para acessar um banco de dados (`db('agentes')`, `db('casos')`), mas o desafio explicitamente pede para armazenar os dados **em memória**, usando arrays na camada de repositories.
+A estrutura que você montou está alinhada com o que esperamos, com pastas para `controllers`, `repositories`, `routes`, `db` e `utils`. Só reforço que o arquivo `INSTRUCTIONS.md` está vazio — não é um erro, mas se for parte do desafio, vale preenchê-lo com instruções ou documentação do projeto para facilitar seu uso e manutenção.
 
-Isso é uma diferença fundamental porque:
+---
 
-- Seu código depende de um banco (PostgreSQL), que não está configurado no projeto (não há pasta `db` nem arquivo de configuração).
-- Os testes esperam que os dados sejam mantidos em arrays dentro do próprio Node.js, sem conexão com banco, para facilitar a manipulação e testes.
-- Por isso, várias operações como criar, atualizar, deletar e buscar agentes e casos não funcionam corretamente, pois o banco não existe e a camada de persistência não está implementada em memória.
+### 2. Conexão e Configuração do Banco de Dados - Um ponto crucial! 🛠️
 
-**Exemplo do seu código que depende do banco:**
+Você configurou o `knexfile.js` corretamente para o ambiente de desenvolvimento, puxando as variáveis do `.env` e apontando para o Postgres local. Também fez o `db.js` para instanciar o Knex, que é o jeito certo!
+
+Mas, um ponto fundamental que pode estar travando sua API é a ausência das **migrations** no repositório. Eu não encontrei nenhuma pasta `db/migrations` nem arquivos de migrations para criar as tabelas `agentes` e `casos`. Sem essas migrations executadas, o banco não terá as tabelas necessárias, o que faz com que as queries do Knex falhem silenciosamente ou lancem erros.
+
+👉 **Por que isso é importante?**  
+Sem as tabelas criadas, suas consultas como:
 
 ```js
-async function findAll(){
-    return await db('agentes').select('*');
-}
+await db('agentes').select('*');
+```
 
-async function createAgent(agenteData){
-    const [createdAgent] = await db('agentes')
-          .insert(agenteData)
-          .returning('*');
-    return createdAgent;
+ou
+
+```js
+await db('casos').where({ id }).first();
+```
+
+não vão funcionar, porque a tabela não existe. Isso explica porque várias funcionalidades básicas (criar, listar, buscar por ID, atualizar, deletar) não funcionam.
+
+**Recomendação:**  
+- Crie as migrations para as tabelas `agentes` e `casos` (definindo colunas e tipos corretos).  
+- Execute as migrations antes de rodar a aplicação.  
+- Se quiser, use seeds para popular as tabelas com dados iniciais, como você já fez.
+
+**Recursos para ajudar:**  
+- [Documentação oficial do Knex.js sobre migrations](https://knexjs.org/guide/migrations.html)  
+- [Vídeo sobre configuração de banco com Docker e Knex](http://googleusercontent.com/youtube.com/docker-postgresql-node) (ajuda a entender o ambiente e conexão)  
+- [Vídeo sobre seeds com Knex](http://googleusercontent.com/youtube.com/knex-seeds)
+
+---
+
+### 3. Tratamento de Erros e Validações - Muito bom, mas pode melhorar! ⚠️
+
+Você está usando o Joi para validar os dados de entrada, o que é excelente! Isso ajuda a evitar que dados inválidos entrem no banco.
+
+Porém, percebi que nos métodos `findAgentById` e `findCaseById` dos repositories, você lança erro quando não encontra o registro:
+
+```js
+async function findAgentById(id){
+    const agente = await db('agentes').where({id}).first();
+    if(!agente){
+        throw new Error('Agente não encontrado');
+    }
+    return agente;
 }
 ```
 
-**O que você deveria fazer:**
+E no controller, você está capturando esse erro para retornar 404, o que é bom, mas pode ser melhorado para evitar que o erro vaze para camadas superiores e causar erros 500 inesperados.
 
-- Criar arrays para armazenar os agentes e casos, por exemplo:
+**Sugestão:**  
+- Em vez de lançar erro no repository, retorne `null` ou `undefined` quando não encontrar.  
+- No controller, cheque se o resultado é `null` para retornar 404.  
+- Isso torna o fluxo mais claro e evita tratamentos de erro genéricos.
 
-```js
-const agentes = [];
-const casos = [];
-```
-
-- Implementar as funções do repository manipulando esses arrays, usando métodos como `push`, `find`, `filter`, `map`, etc.
-
-- Gerar IDs únicos para novos agentes e casos (pode usar um contador simples ou `uuid`).
-
-- Assim, você garante que a API funcione sem banco, como o desafio pede.
-
-**Recurso recomendado para entender melhor manipulação de arrays e armazenamento em memória:**
-
-- [Manipulação de Arrays em JavaScript - YouTube](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI)
-
----
-
-### 2. Endpoints existem, mas não funcionam corretamente por causa da camada de dados
-
-Seus arquivos de rotas (`agentesRoutes.js` e `casosRoutes.js`) e controllers estão bem definidos, o que é ótimo! Isso mostra que você entendeu a arquitetura MVC. Porém, como a camada de repository depende de banco inexistente, as chamadas para criar, buscar, atualizar e deletar agentes e casos falham.
-
-Por exemplo, no controller de agentes:
+Exemplo ajustado no repository:
 
 ```js
-async function findById(req, res) {
-  try {
-    const { id } = req.params;
-    const agente = await agentesRepository.findAgentById(id);
-    res.status(200).json(agente);
-  } catch (error) {
-    return res.status(404).json({
-      status: 404,
-      message: "Agente não encontrado",
-      errors: {
-        id: "Nenhum agente encontrado com o ID fornecido",
-      },
-    });
-  }
+async function findAgentById(id){
+    return await db('agentes').where({id}).first() || null;
 }
 ```
 
-Aqui, você lança erro se o agente não existe, mas seu repository está lançando erro para todos os casos porque não há dados em memória. Isso gera falhas em vários endpoints.
-
-**Dica:** Quando você implementar o armazenamento em arrays, adapte o método `findAgentById` para retornar `null` ou `undefined` se não encontrar, e faça o controller responder 404 nesse caso, sem lançar exceção.
-
----
-
-### 3. Validação de IDs e campos `id` no payload
-
-Você está controlando corretamente para que o campo `id` não seja alterado via PUT ou PATCH, o que é ótimo! Só tome cuidado para que, ao criar novos agentes e casos, você gere o `id` automaticamente no repository para garantir unicidade e evitar conflitos.
-
----
-
-### 4. Organização do projeto
-
-Sua estrutura de arquivos está muito próxima do esperado, parabéns! Apenas certifique-se que:
-
-- Você tem a pasta `utils/` com o arquivo `errorHandler.js` para lidar com erros globais (você está usando no `server.js`, mas não enviou o código desse arquivo para revisão).
-- A pasta `db/` não é necessária, pois o desafio pede armazenamento em memória. Então remova essa dependência para evitar confusão.
-
-Se quiser entender melhor a arquitetura MVC e organização de arquivos, recomendo este vídeo:
-
-- [Arquitetura MVC com Node.js e Express - YouTube](https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH)
-
----
-
-### 5. Outros detalhes que podem ajudar
-
-- No controller de casos, você está validando o campo `agente_id` para garantir que o agente exista antes de criar ou atualizar o caso, isso é excelente! Só reforço que, para funcionar, o repositório de agentes precisa estar correto (em memória).
-- Continue usando o `express.json()` no `server.js` para parsear JSON, está correto.
-- O Swagger está configurado, isso é um diferencial importante para documentação!
-
----
-
-## Resumo rápido para você focar 🔥
-
-- **Implementar o armazenamento dos dados em memória (arrays) na camada de repositories**, removendo a dependência de banco de dados. Isso é o ponto chave para destravar toda a API.
-- Ajustar os métodos dos repositories para manipular esses arrays (criar, buscar, atualizar, deletar).
-- Garantir que o `id` seja gerado automaticamente ao criar novos agentes e casos.
-- Adaptar os controllers para lidar com o retorno dos repositories (ex: retornar 404 quando `findById` retornar `undefined`).
-- Remover a pasta `db/` ou qualquer código que dependa de banco, pois não é requisito aqui.
-- Revisar o arquivo `utils/errorHandler.js` para garantir que está implementado e funcionando para capturar erros globais.
-- Continuar usando validação Joi para garantir qualidade dos dados.
-- Revisar a documentação Swagger para garantir que está atualizada com os endpoints corretos.
-
----
-
-## Para te ajudar a começar, aqui vai um exemplo simples de como implementar um repository em memória para agentes:
+E no controller:
 
 ```js
-// repositories/agentesRepository.js
-let agentes = [];
-let lastId = 0;
-
-function findAll() {
-  return agentes;
+const agente = await agentesRepository.findAgentById(id);
+if (!agente) {
+  return res.status(404).json({
+    status: 404,
+    message: "Agente não encontrado",
+    errors: { id: "Nenhum agente encontrado com o ID fornecido" }
+  });
 }
+```
 
-function findAgentById(id) {
-  return agentes.find(a => a.id === Number(id));
+---
+
+### 4. Uso de Tipos e Comparações no filtro dos casos - Atenção com tipos! 🔎
+
+No controller de casos, você faz filtros assim:
+
+```js
+if (agente_id) {
+  casos = casos.filter((c) => c.agente_id === agente_id);
 }
+```
 
-function createAgent(agentData) {
-  lastId++;
-  const newAgent = { id: lastId, ...agentData };
-  agentes.push(newAgent);
-  return newAgent;
+Aqui, `agente_id` vem do `req.query` e será sempre uma string, mas `c.agente_id` pode ser number (se veio do banco). Isso pode gerar falhas na comparação.
+
+**Recomendação:**  
+- Converta o `agente_id` para número antes da comparação, ou use comparação não estrita (`==`), mas a melhor prática é garantir o tipo correto:
+
+```js
+if (agente_id) {
+  const agenteIdNum = Number(agente_id);
+  casos = casos.filter((c) => c.agente_id === agenteIdNum);
 }
+```
 
-function updateAgent(id, agentData) {
-  const index = agentes.findIndex(a => a.id === Number(id));
-  if (index === -1) return null;
-  agentes[index] = { id: Number(id), ...agentData };
-  return agentes[index];
-}
+---
 
-function deleteAgent(id) {
-  const initialLength = agentes.length;
-  agentes = agentes.filter(a => a.id !== Number(id));
-  return agentes.length < initialLength;
-}
+### 5. Consistência nos nomes dos parâmetros - Pequenos detalhes fazem diferença! ✍️
 
-module.exports = {
-  findAll,
-  findAgentById,
-  createAgent,
-  updateAgent,
-  deleteAgent,
+Notei que em alguns lugares você usa `id` para o identificador do agente, e em outros `agente_id` para o campo que referencia o agente no caso. Isso está correto, mas no controller de casos, no método `getAgenteAssociateToCase`, você não verifica se o caso existe antes de buscar o agente:
+
+```js
+const caso = await casosRepository.findCaseById(caso_id);
+const agente = await agentesRepository.findAgentById(caso.agente_id);
+res.status(200).json(agente);
+```
+
+Se `findCaseById` lançar erro por não encontrar, você captura e retorna 404, mas se o caso existir e o agente não, você não trata o erro. Isso pode gerar erro 500.
+
+**Sugestão:**  
+- Verifique se o agente existe antes de retornar. Se não existir, retorne 404 com mensagem clara.
+
+---
+
+### 6. Migrations e Seeds - Ausência detectada! ⚠️
+
+Você tem as seeds para `agentes` e `casos`, o que é ótimo! Mas como falei, as migrations que criam as tabelas estão faltando no seu projeto.
+
+Sem as migrations, o banco não terá as tabelas e os seeds não conseguirão popular nada.
+
+---
+
+### 7. Sobre o Docker - Você fez um `docker-compose.yml` correto! 🐳
+
+Sua configuração do Docker para Postgres está boa, com as variáveis de ambiente corretas e volume persistente.
+
+Só um lembrete: para que o Knex consiga se conectar ao banco dentro do container, a configuração do host deve ser adequada (no seu `knexfile.js`, o host está `127.0.0.1` para desenvolvimento, o que é correto para rodar localmente, mas se usar Docker Compose, pode precisar ser `postgres` para comunicação entre containers).
+
+---
+
+## Exemplos de Ajustes para você aplicar 🚀
+
+### Exemplo de migration para `agentes`:
+
+```js
+exports.up = function(knex) {
+  return knex.schema.createTable('agentes', function(table) {
+    table.increments('id').primary();
+    table.string('nome').notNullable();
+    table.date('dataDeIncorporacao').notNullable();
+    table.string('cargo').notNullable();
+  });
+};
+
+exports.down = function(knex) {
+  return knex.schema.dropTable('agentes');
 };
 ```
 
-Esse padrão você pode replicar para os casos também.
+### Exemplo de migration para `casos`:
+
+```js
+exports.up = function(knex) {
+  return knex.schema.createTable('casos', function(table) {
+    table.increments('id').primary();
+    table.string('titulo').notNullable();
+    table.text('descricao').notNullable();
+    table.enu('status', ['aberto', 'solucionado']).notNullable();
+    table.integer('agente_id').unsigned().notNullable()
+      .references('id').inTable('agentes').onDelete('CASCADE');
+  });
+};
+
+exports.down = function(knex) {
+  return knex.schema.dropTable('casos');
+};
+```
 
 ---
 
-## Recursos para você aprofundar e melhorar sua API
+## Recursos para você mergulhar fundo e acertar tudo! 📚
 
-- [Fundamentos de API REST e Express.js - YouTube](https://youtu.be/RSZHvQomeKE)
-- [Express.js Routing - Documentação Oficial](https://expressjs.com/pt-br/guide/routing.html)
-- [Validação de dados em APIs Node.js com Joi - YouTube](https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_)
-- [Manipulação de Arrays em JavaScript - YouTube](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI)
-- [Arquitetura MVC com Node.js e Express - YouTube](https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH)
+- Configuração de Banco de Dados com Docker e Knex:  
+  http://googleusercontent.com/youtube.com/docker-postgresql-node  
+- Migrations Knex.js (criação e versionamento de tabelas):  
+  https://knexjs.org/guide/migrations.html  
+- Query Builder Knex.js (para manipular dados no banco):  
+  https://knexjs.org/guide/query-builder.html  
+- Validação de dados e tratamento de erros na API:  
+  https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_  
+- Entendendo status HTTP e respostas corretas:  
+  https://youtu.be/RSZHvQomeKE  
 
 ---
 
-## Conclusão 🌟
+## Resumo Rápido para você focar e melhorar 💡
 
-HgrXKPT, você já está com uma base muito boa: controllers organizados, rotas definidas, validações e tratamento de erros. O principal ponto que está travando sua API é a camada de dados — o uso do banco de dados não é esperado aqui, e por isso os testes e funcionalidades não funcionam como deveriam.
+- **Crie e execute as migrations** para as tabelas `agentes` e `casos` antes de rodar a aplicação. Sem isso, o banco não terá as tabelas e as operações falharão.  
+- Ajuste os métodos dos repositories para **não lançar erros**, mas retornar `null` quando não encontrar registros, deixando o controller cuidar do retorno 404.  
+- Garanta que as comparações de IDs entre query params e dados do banco estejam no **mesmo tipo** (number vs string).  
+- No controller de casos, trate o cenário onde o agente associado ao caso não existe.  
+- Use as seeds para popular o banco, mas só depois de garantir que as migrations rodaram com sucesso.  
+- Confira se o host do banco no `knexfile.js` está correto para o ambiente onde você está rodando (local ou Docker).  
 
-Se você focar em implementar um armazenamento simples em memória com arrays, vai destravar todo o funcionamento da API e conseguir atender todos os requisitos básicos, além de deixar seu código mais alinhado com o desafio.
+---
 
-Continue assim, aprendendo e ajustando! Estou aqui para te ajudar a qualquer momento. Você tem tudo para construir uma API incrível! 🚓👊
+Você está no caminho certo, HgrXKPT! 🚀 Com esses ajustes, sua API vai funcionar lindamente e você vai destravar todas as funcionalidades que ainda estão travadas. Continue firme, pois a persistência é a chave do sucesso! 💪👊
 
-Abraço e bons códigos! 💻✨
+Se precisar de ajuda para criar as migrations ou entender melhor o fluxo, me chama! Estou aqui para te ajudar a crescer. 😉
+
+Boa codificação e até a próxima! 👋✨
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
