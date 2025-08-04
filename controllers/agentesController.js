@@ -29,7 +29,7 @@ async function findById(req, res) {
 async function addAgente(req, res) {
   const agentSchema = Joi.object({
     nome: Joi.string().trim().min(1).required(),
-    dataDeIncorporacao: Joi.date().iso().required(),
+    dataDeIncorporacao: Joi.date().iso().max("now").required(),
     cargo: Joi.string().trim().min(1).required(),
   });
   try{
@@ -51,17 +51,21 @@ async function addAgente(req, res) {
 
   const agent = await agentesRepository.createAgent(value);
 
+
+
+
+
   return res.status(201).json({
       status: 201,
       message: "Agente criado com sucesso",
       data: {
         id: agent.id,
         nome: agent.nome,
-        dataDeIncorporacao: agent.dataDeIncorporacao,
+        dataDeIncorporacao: agent.dataDeIncorporacao.toISOString().split('T')[0],
         cargo: agent.cargo
       }
     });
-    
+
 
   }catch (error) {
     return res.status(500).json({
