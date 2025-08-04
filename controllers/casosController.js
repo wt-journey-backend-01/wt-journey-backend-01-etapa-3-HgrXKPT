@@ -4,27 +4,22 @@ const agentesRepository = require("../repositories/agentesRepository");
 const Joi = require("joi");
 
 async function getAllCasos(req, res) {
-  const { status, agente_id, search } = req.query;
-  let casos = await casosRepository.findAll();
-
-  if (status) {
-    casos = casos.filter((c) => c.status === status);
-  }
-
-  if (agente_id) {
-    casos = casos.filter((c) => c.agente_id === agente_id);
-  }
-
-
-  if (search) {
-    casos = casos.filter(
-      (c) =>
-        c.titulo.toLowerCase().includes(search.toLowerCase()) ||
-        c.descricao.toLowerCase().includes(search.toLowerCase())
-    );
-  }
-
+  try{
+    const { status, agente_id, search } = req.query;
+  const filters = { status, agente_id, search }
+  const casos = await casosRepository.findAll(filters);
+  
   res.status(200).json(casos);
+  }catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Erro ao buscar casos",
+      errors: {
+        internal: error.message
+      }
+    });
+  }
+  
 }
 
 async function getCasoById(req, res) {
@@ -45,6 +40,8 @@ async function getCasoById(req, res) {
 
   res.status(200).json(caso);
 }
+
+
 
 async function getAgenteAssociateToCase(req, res) {
   try{
@@ -70,10 +67,10 @@ async function createCase(req, res) {
     titulo: Joi.string().trim().min(1).required(),
     descricao: Joi.string().trim().min(1).required(),
     status: Joi.string().valid("aberto", "solucionado").required(),
-    agente_id: Joi.required(),
+    agente_id: Joi.number().required(),
   }).strict();
 
-
+try{
   const { error, value } = createSchema.validate(req.body, {
     allowUnknown: false
   });
@@ -114,6 +111,15 @@ async function createCase(req, res) {
   const createdCase =  await casosRepository.createCase(newCase);
 
   res.status(201).json(createdCase);
+} catch (error) {
+  return res.status(500).json({
+    status: 500,
+    message: "Erro ao criar caso",
+    errors: {
+      internal: error.message
+    }
+  });
+  
 }
 
 async function updateCase(req, res) {
@@ -121,7 +127,7 @@ async function updateCase(req, res) {
     titulo: Joi.string().trim().min(1).required(),
     descricao: Joi.string().trim().min(1).required(),
     status: Joi.string().valid("aberto", "solucionado").required(),
-    agente_id: Joi.required(),
+    agente_id: Joi.number().required(),
   }).strict();
 
   const { caso_id } = req.params;

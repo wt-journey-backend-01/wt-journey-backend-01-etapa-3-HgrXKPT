@@ -3,27 +3,9 @@ const { parseISO, isValid, isFuture } = require("date-fns");
 const Joi = require("joi");
 
 async function findAll(req, res) {
-  const { cargo, sort } = req.query;
 
-  let agentes = await agentesRepository.findAll();
-
-  if (cargo) {
-    agentes = agentes.filter((a) =>
-      a.cargo.toLowerCase().includes(cargo.toLowerCase())
-    );
-  }
-
-  if (sort === "dataDeIncorporacao") {
-    agentes.sort(
-      (a, b) =>
-        new Date(a.dataDeIncorporacao).getTime() -
-        new Date(b.dataDeIncorporacao).getTime()
-    );
-  } else if (sort === "-dataDeIncorporacao") {
-    agentes.sort(
-      (a, b) => new Date(b.dataDeIncorporacao) - new Date(a.dataDeIncorporacao)
-    );
-  }
+  const filters =  { cargo, sort } = req.query;
+  let agentes = await agentesRepository.findAll(filters);
 
   res.status(200).json(agentes);
 }
@@ -50,8 +32,8 @@ async function addAgente(req, res) {
     dataDeIncorporacao: Joi.date().iso().required(),
     cargo: Joi.string().trim().min(1).required(),
   });
-
-  const { error, value } = agentSchema.validate(req.body);
+  try{
+    const { error, value } = agentSchema.validate(req.body);
 
   if (error) {
     const errorDetails = error.details.reduce((acc, curr) => {
@@ -75,6 +57,16 @@ async function addAgente(req, res) {
 
   const agent = await agentesRepository.createAgent(newAgent);
   res.status(201).json(agent);
+  }catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Erro ao criar agente",
+      errors: {
+        internal: error.message
+      }
+    });
+  }
+  
 }
 
 async function updateAgent(req, res) {
@@ -104,6 +96,14 @@ async function updateAgent(req, res) {
       });
     }
 
+    const existingAgent = await agentesRepository.findAgentById(id);
+    if (!existingAgent) {
+      return res.status(404).json({
+        status: 404,
+        message: "Agente não encontrado",
+      });
+    }
+
     const toUpdateAgent = {
       nome: value.nome,
       dataDeIncorporacao: value.dataDeIncorporacao,
@@ -113,10 +113,13 @@ async function updateAgent(req, res) {
     const updated = await agentesRepository.updateAgent(id, toUpdateAgent);
 
     if (!updated) {
-      return res.status(404).json({
-        status: 404,
-        message: "Agente não encontrado",
-      });
+     return res.status(404).json({
+      status: 404,
+      message: "Agente não encontrado",
+      errors: {
+        id: "O agente não foi encontrado",
+      },
+    });
     }
 
     res.status(200).json(updated);

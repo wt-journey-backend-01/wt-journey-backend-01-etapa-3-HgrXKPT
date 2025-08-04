@@ -3,9 +3,29 @@
 const db = require('../db/db');
 
 
- async function findAll() {
-    const casos = await db('casos').select('*');
+ async function findAll(filters) {
+  try{
+     const casos = await db('casos').select('*');
+
+    if(filters.status){
+      casos.where('status', filters.status);
+    }
+
+    if(filters.agente_id){
+      casos.where('agente_id', filters.agente_id);
+    }
+
+    if(filters.search){
+      casos.where(function() {
+        this.where('titulo', 'like', `%${filters.search}%`)
+            .orWhere('descricao', 'like', `%${filters.search}%`);
+      });
+    }
     return casos;
+  }catch (error) {
+    throw new Error('Erro ao buscar casos: ' + error.message);
+  }
+   
 }
 
  async function findCaseById(id){
