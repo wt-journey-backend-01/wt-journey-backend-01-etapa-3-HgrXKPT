@@ -23,9 +23,6 @@ const db = require('../db/db');
       });
     }
     const casos = await query.select('*');
-    if(!casos){
-      throw new Error('Nenhum caso encontrado com/sem os filtros fornecidos');
-    }
     return casos;
   }catch (error) {
     throw new Error('Erro ao buscar casos: ' + error.message);
@@ -39,9 +36,6 @@ const db = require('../db/db');
 
     const caso = await  query.where({ id }).first();
 
-    if(!caso){
-      throw new Error('Caso não encontrado');
-    }
     return caso || null;  
     }catch (error) {
       throw new Error('Erro ao buscar caso: ' + error.message);
@@ -76,9 +70,7 @@ async function createCase(caseData){
       .update(updated)
       .returning('*');
 
-    if(!updatedCase){
-       throw new Error('Erro ao atualizar caso: o repositório retornou null/undefined'); 
-    }
+ 
 
       return updatedCase;
 
@@ -91,8 +83,9 @@ async function deleteCase(id){
     const deleted = await db('casos')
       .where({ id })
       .del();
+
       if(!deleted){
-         throw new Error('Erro ao deletar caso: o repositório retornou null/undefined');
+         return null
       }
   return true; // Retorna o número de registros deletados
 

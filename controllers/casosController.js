@@ -8,17 +8,9 @@ async function getAllCasos(req, res) {
     const { status, agente_id, search } = req.query;
   const filters = { status, agente_id, search }
   const casos = await casosRepository.findAll(filters);
-  if(!casos) {
-    return res.status(404).json({
-      status: 404,
-      message: "Nenhum caso encontrado",
-      errors: {
-        search: "Nenhum caso corresponde aos filtros fornecidos",
-      },
-    });
-  }
   
   return res.status(200).json(casos);
+
   }catch (error) {
     return res.status(500).json({
       status: 500,
@@ -33,10 +25,10 @@ async function getAllCasos(req, res) {
 
 async function getCasoById(req, res) {
 
+  try{
+    const { caso_id } = req.params;
 
-  const { caso_id } = req.params;
-
-  let caso = await casosRepository.findCaseById(caso_id);
+  const caso = await casosRepository.findCaseById(caso_id);
 
   if (!caso) {
     return res.status(404).json({
@@ -48,6 +40,16 @@ async function getCasoById(req, res) {
   };
 
   return res.status(200).json(caso);
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Erro ao buscar caso",
+      errors: {
+        internal: error.message
+      }
+    });
+  }
+  
 }
 
 
@@ -64,10 +66,10 @@ async function getAgenteAssociateToCase(req, res) {
 
   }catch (error){
       return res.status(404).json({
-      status: 404,
-      message: "Parâmetros inválidos",
+      status: 500,
+      message: "Erro ao buscar casos",
       errors: {
-        caso_id: "O caso não foi encontrado",},
+        caso_id: error.message},
     });
   }
 
@@ -112,26 +114,12 @@ try{
     });
   };
 
+  const createdCase =  await casosRepository.createCase(value);
 
-  const newCase = {
-    titulo: value.titulo,
-    descricao:value.descricao,
-    status : value.status,
-    agente_id : value.agente_id,
-  };
+  
 
-  const createdCase =  await casosRepository.createCase(newCase);
-  if(!createdCase){
-    return res.status(400).json({
-      status: 500,
-      message: "Erro ao criar caso no banco de dados",
-      errors: {
-        internal: "Algum dos dados fornecidos não é válido ou o repositório retornou null/undefined"
-      }
-    });
-  }
+   res.status(201).json(createdCase);
 
-  return res.status(201).json(createdCase);
 } catch (error) {
   return res.status(500).json({
     status: 500,

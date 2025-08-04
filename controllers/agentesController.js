@@ -5,7 +5,7 @@ const Joi = require("joi");
 async function findAll(req, res) {
 
   const filters =  { cargo, sort } = req.query;
-  let agentes = await agentesRepository.findAll(filters);
+  const agentes = await agentesRepository.findAll(filters);
 
   res.status(200).json(agentes);
 }
@@ -50,8 +50,6 @@ async function addAgente(req, res) {
 
 
   const agent = await agentesRepository.createAgent(value);
-
-
 
 
 
