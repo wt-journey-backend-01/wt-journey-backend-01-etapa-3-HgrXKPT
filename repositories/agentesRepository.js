@@ -39,15 +39,15 @@ async function findAgentById(id) {
 
 async function createAgent(agenteData) {
   try {
-    const [createdAgent] = await db("agentes")
+    const createdAgent = await db("agentes")
       .insert(agenteData)
       .returning("*"); // Retorna todas as colunas do registro criado
 
-      if (!createdAgent) {
+      if (!createdAgent[0]) {
         throw new Error("Erro ao criar agente: o repositório retornou null/undefined"); 
       }
 
-    return createdAgent;
+    return createdAgent[0];
   } catch (dbError) {
     throw new Error("Erro ao criar agente: " + dbError.message);
   }

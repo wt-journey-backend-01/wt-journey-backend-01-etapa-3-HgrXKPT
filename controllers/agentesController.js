@@ -49,27 +49,9 @@ async function addAgente(req, res) {
   }
 
 
-  const newAgent = {
-    nome: value.nome,
-    dataDeIncorporacao: value.dataDeIncorporacao,
-    cargo: value.cargo,
-  };
+  const agent = await agentesRepository.createAgent(value);
 
-  const agent = await agentesRepository.createAgent(newAgent);
-  if(!agent){
-    return res.status(500).json({
-        status: 500,
-        message: "Erro ao criar agente no banco de dados",
-        errors: {
-          internal: "O repositório retornou null/undefined"
-        }
-      });
-  }
-  return res.status(201).json({
-      status: 201,
-      message: "Agente criado com sucesso",
-      data: agent
-    });
+  return res.status(201).json(agent);
 
   }catch (error) {
     return res.status(500).json({
