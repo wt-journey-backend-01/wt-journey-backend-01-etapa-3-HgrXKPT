@@ -1,5 +1,6 @@
 
 
+const { tr } = require('date-fns/locale');
 const db = require('../db/db');
 
 
@@ -22,6 +23,9 @@ const db = require('../db/db');
       });
     }
     const casos = await query.select('*');
+    if(!casos){
+      throw new Error('Nenhum caso encontrado com/sem os filtros fornecidos');
+    }
     return casos;
   }catch (error) {
     throw new Error('Erro ao buscar casos: ' + error.message);
@@ -30,22 +34,34 @@ const db = require('../db/db');
 }
 
  async function findCaseById(id){
-  
-    const query =  db('casos');
-    // Verifica se o caso foi encontrado
+    try{
+      const query =  db('casos');
+
+    const caso = await  query.where({ id }).first();
+
     if(!caso){
       throw new Error('Caso não encontrado');
     }
-    const caso = await  query.where({ id }).first();
     return caso || null;  
+    }catch (error) {
+      throw new Error('Erro ao buscar caso: ' + error.message);
+    }
+    
    
 
 }
 
 async function createCase(caseData){
-
+  try{
     const [createdCase] = await db('casos').insert(caseData).returning('*');
+    if(!createdCase){
+      throw new Error('Erro ao criar caso: o repositório retornou null/undefined'); 
+    }
     return createdCase;
+  }catch (error) {
+    throw new Error('Erro ao criar caso: ' + error.message);
+  }
+    
 
 }
 
@@ -60,6 +76,10 @@ async function createCase(caseData){
       .update(updated)
       .returning('*');
 
+    if(!updatedCase){
+       throw new Error('Erro ao atualizar caso: o repositório retornou null/undefined'); 
+    }
+
       return updatedCase;
 
   }catch (error) {
@@ -68,10 +88,13 @@ async function createCase(caseData){
 }
 async function deleteCase(id){
 
-    const deletedCount = await db('casos')
+    const deleted = await db('casos')
       .where({ id })
       .del();
-  return deletedCount; // Retorna o número de registros deletados
+      if(!deleted){
+         throw new Error('Erro ao deletar caso: o repositório retornou null/undefined');
+      }
+  return true; // Retorna o número de registros deletados
 
 }
 

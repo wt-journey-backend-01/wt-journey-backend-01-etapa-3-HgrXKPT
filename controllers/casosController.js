@@ -8,8 +8,17 @@ async function getAllCasos(req, res) {
     const { status, agente_id, search } = req.query;
   const filters = { status, agente_id, search }
   const casos = await casosRepository.findAll(filters);
+  if(!casos) {
+    return res.status(404).json({
+      status: 404,
+      message: "Nenhum caso encontrado",
+      errors: {
+        search: "Nenhum caso corresponde aos filtros fornecidos",
+      },
+    });
+  }
   
-  res.status(200).json(casos);
+  return res.status(200).json(casos);
   }catch (error) {
     return res.status(500).json({
       status: 500,
@@ -38,7 +47,7 @@ async function getCasoById(req, res) {
     });
   };
 
-  res.status(200).json(caso);
+  return res.status(200).json(caso);
 }
 
 
@@ -112,8 +121,17 @@ try{
   };
 
   const createdCase =  await casosRepository.createCase(newCase);
+  if(!createdCase){
+    return res.status(400).json({
+      status: 500,
+      message: "Erro ao criar caso no banco de dados",
+      errors: {
+        internal: "Algum dos dados fornecidos não é válido ou o repositório retornou null/undefined"
+      }
+    });
+  }
 
-  res.status(201).json(createdCase);
+  return res.status(201).json(createdCase);
 } catch (error) {
   return res.status(500).json({
     status: 500,
@@ -133,7 +151,8 @@ async function updateCase(req, res) {
     agente_id: Joi.number().required(),
   }).strict();
 
-  const { caso_id } = req.params;
+  try{
+      const { caso_id } = req.params;
 
   const { error, value } = updateSchema.validate(req.body, {
     allowUnknown: false,
@@ -185,7 +204,18 @@ async function updateCase(req, res) {
 
 
   const updated = await casosRepository.updateCase(caso_id, value);
-  res.status(200).json(updated);
+  return res.status(200).json(updated);
+  }catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Erro ao atualizar caso",
+      errors: {
+        internal: error.message
+      }
+    });
+  }
+
+  
 }
 
 async function  partialUpdateCase(req, res) {
@@ -193,10 +223,11 @@ async function  partialUpdateCase(req, res) {
     titulo: Joi.string().trim().min(1).optional(),
     descricao: Joi.string().trim().min(1).optional(),
     status: Joi.string().valid("aberto", "solucionado").optional(),
-    agente_id: Joi.optional(),
+    agente_id: Joi.number().optional(),
   }).strict();
 
-  const { caso_id } = req.params;
+  try{
+      const { caso_id } = req.params;
 
   const {error, value} = updateSchema.validate(req.body, {
     allowUnknown: false,
@@ -249,7 +280,17 @@ async function  partialUpdateCase(req, res) {
 
   const updated = await casosRepository.updateCase(caso_id, value);
 
-  res.status(200).json(updated);
+  return res.status(200).json(updated);
+  }catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Erro ao atualizar caso",
+      errors: {
+        internal: error.message
+      }
+    });
+  }
+  
 }
 
 async function deleteCase(req, res) {

@@ -56,7 +56,16 @@ async function addAgente(req, res) {
   };
 
   const agent = await agentesRepository.createAgent(newAgent);
-  res.status(201).json(agent);
+  if(!agente){
+    return res.status(500).json({
+        status: 500,
+        message: "Erro ao criar agente no banco de dados",
+        errors: {
+          internal: "O repositório retornou null/undefined"
+        }
+      });
+  }
+  return res.status(201).json(agent);
   }catch (error) {
     return res.status(500).json({
       status: 500,
@@ -122,9 +131,9 @@ async function updateAgent(req, res) {
     });
     }
 
-    res.status(200).json(updated);
+    return res.status(200).json(updated);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 }
 
@@ -179,25 +188,48 @@ async function partialUpdate(req, res) {
 
   const updated = await agentesRepository.updateAgent(id, toUpdateAgent);
 
-  res.status(200).json(updated);
+  return res.status(200).json(updated);
 }
 
 async function deleteAgent(req, res) {
-  const { id } = req.params;
+  try{
+    const { id } = req.params;
+
+    const existingAgent = await agentesRepository.findAgentById(id);
+    if (!existingAgent){
+      return res.status(404).json({
+        status: 404,
+        message: "Agente não encontrado",
+        errors: {
+          id: "Nenhum agente encontrado com o ID fornecido",
+        },
+      });
+    }
   
   const removed = await agentesRepository.deleteAgent(id);
 
   if (!removed) {
     return res.status(404).json({
-      status: 404,
-      message: "Agente não encontrado",
+      status: 400,
+      message: "Agente não deletado",
       errors: {
-        id: "O agente não foi encontrado",
+        id: "O agente não foi deletado",
       },
     });
   }
 
-  res.status(204).send();
+  }catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Erro ao deletar agente",
+      errors: {
+        internal: error.message
+      }
+    });
+  }
+  
+
+  return res.status(204).send();
 }
 
 

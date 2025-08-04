@@ -14,6 +14,10 @@ async function findAll(filters) {
       query.orderBy("dataDeIncorporacao", "desc");
     }
     const agentes = await query.select("*");
+
+    if(!agentes) {
+      return null; 
+    }
     return agentes ;
 
 
@@ -21,11 +25,16 @@ async function findAll(filters) {
 
 async function findAgentById(id) {
 
-  const agente = await db("agentes").where({ id }).first();
+  try{
+    const agente = await db("agentes").where({ id }).first();
   if (!agente) {
     throw new Error("Agente não encontrado");
   }
   return agente || null;
+  }catch (error) {
+    throw new Error("Erro ao buscar agente: " + error.message);
+  }
+  
 }
 
 async function createAgent(agenteData) {
@@ -34,6 +43,10 @@ async function createAgent(agenteData) {
       .insert(agenteData)
       .returning("*"); // Retorna todas as colunas do registro criado
 
+      if (!createdAgent) {
+        throw new Error("Erro ao criar agente: o repositório retornou null/undefined"); 
+      }
+
     return createdAgent;
   } catch (dbError) {
     throw new Error("Erro ao criar agente: " + dbError.message);
@@ -41,16 +54,28 @@ async function createAgent(agenteData) {
 }
 
 async function updateAgent(id, agenteData) {
-  const [updatedAgent] = await db("agentes")
+  try{
+    const [updatedAgent] = await db("agentes")
     .where({ id })
     .update(agenteData)
     .returning("*");
+
+    if(!updatedAgent) {
+      throw new Error("Erro ao atualizar agente: o repositório retornou null/undefined"); 
+    }
   return updatedAgent;
+  }catch(error) {
+    throw new Error("Erro ao atualizar agente: " + error.message);
+  }
+  
 }
 
 async function deleteAgent(id) {
-  const deletedCount = await db("agentes").where({ id }).del();
-  return deletedCount; // Retorna o número de registros deletados
+  const deleted = await db("agentes").where({ id }).del();
+  if (!deleted) {
+    throw new Error("Erro ao deletar agente: o repositório retornou null/undefined");
+  }
+  return true; // Retorna o número de registros deletados
 }
 
 module.exports = {
