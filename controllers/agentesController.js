@@ -56,7 +56,7 @@ async function addAgente(req, res) {
   };
 
   const agent = await agentesRepository.createAgent(newAgent);
-  if(!agente){
+  if(!agent){
     return res.status(500).json({
         status: 500,
         message: "Erro ao criar agente no banco de dados",
@@ -65,7 +65,8 @@ async function addAgente(req, res) {
         }
       });
   }
-  return res.status(201).json(agent);
+  return res.status(201).send(agent);
+
   }catch (error) {
     return res.status(500).json({
       status: 500,
