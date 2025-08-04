@@ -14,12 +14,14 @@ require('dotenv').config();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(errorHandler);
+
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/casos', casosRoute);
 app.use('/agentes', agentesRoute);
 
-app.use(errorHandler);
+
 
 
 app.listen(port, () => {
