@@ -32,15 +32,11 @@ async function getCasoById(req, res) {
   const caso = await casosRepository.findCaseById(caso_id);
 
   if (!caso) {
-    return res.status(404).json({
-      status: 404,
-      message: "Caso inexistente",
-      errors: {
-        caso_id: "O caso não foi encontrado" },
-    });
+    return res.status(404).json();
   };
 
   return res.status(200).json(caso);
+
   } catch (error) {
     return res.status(500).json({
       status: 500,
@@ -59,14 +55,18 @@ async function getAgenteAssociateToCase(req, res) {
   try{
     const { caso_id } = req.params;
     const caso = await casosRepository.findCaseById(caso_id);
+
     if (!caso) {
     return res.status(404).json({ message: "Caso não encontrado" });
   }
     const agente = await agentesRepository.findAgentById(caso.agente_id);
-    res.status(200).json(agente);
+    if(!agente){
+      return res.status(404).json();
+    }
+    return res.status(200).json(agente);
 
   }catch (error){
-      return res.status(404).json({
+      return res.status(500).json({
       status: 500,
       message: "Erro ao buscar casos",
       errors: {
@@ -99,11 +99,7 @@ async function createCase(req, res) {
 
   const existingAgent = await agentesRepository.findAgentById(value.agente_id);
   if (!existingAgent) {
-    return res.status(404).json({
-      status: 404,
-      message: "Agente inexistente",
-      errors: errors.details
-    });
+    return res.status(404).json();
   };
 
   const createdCase =  await casosRepository.createCase(value);
@@ -124,23 +120,20 @@ async function createCase(req, res) {
 }}
 
 async function updateCase(req, res) {
+
   const updateSchema = Joi.object({
     titulo: Joi.string().trim().min(1).required(),
     descricao: Joi.string().trim().min(1).required(),
     status: Joi.string().valid("aberto", "solucionado").required(),
     agente_id: Joi.number().required(),
-  });
+  }).strict();
 
       const { caso_id } = req.params;
 
   const { error, value } = updateSchema.validate(req.body);
 
   if (error) {
-    return res.status(400).json({
-      status: 400,
-      message: "Dados inválidos",
-      errors: errorDetails
-    });
+    return res.status(400).json();
   }
 
   const existingCase = await casosRepository.findCaseById(caso_id);

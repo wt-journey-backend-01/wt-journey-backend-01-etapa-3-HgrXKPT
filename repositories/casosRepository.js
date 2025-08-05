@@ -32,14 +32,14 @@ const db = require('../db/db');
 
  async function findCaseById(id){
 
-      const query =  db('casos');
+    const query =  db("casos");
 
-    const caso = await  query.where({ id }).first();
+    const caso = await query.where({ id }).first();
+
     if(!caso){
-      return null
+      return null;
     }
     
-
     return caso;  
   
     

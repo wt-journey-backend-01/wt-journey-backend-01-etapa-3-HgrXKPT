@@ -32,7 +32,7 @@ async function findAll(filters) {
 async function findAgentById(id) {
 
    
-       const query = db("agentes");
+    const query = db("agentes");
 
     const agente = await query.where({ id }).first();
 
