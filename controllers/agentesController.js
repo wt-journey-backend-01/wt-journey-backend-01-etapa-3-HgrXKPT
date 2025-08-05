@@ -35,6 +35,7 @@ async function addAgente(req, res) {
   try{
     const { value } = agentSchema.validate(req.body);
 
+
   const agent = await agentesRepository.createAgent(value);
 
 
@@ -70,7 +71,24 @@ async function updateAgent(req, res) {
       });
     }
 
-    const {  value } = agentSchema.validate(req.body);
+    const { error, value } = agentSchema.validate(req.body);
+
+    
+    if (error) {
+      return res.status(400).json({
+        status: 400,
+        message: "Dados inválidos",
+        errors: error.details,
+      });
+    }
+
+    const existingAgent = await agentesRepository.findAgentById(id);
+    if (!existingAgent) {
+      return res.status(404).json({
+        status: 404,
+        message: "Agente não encontrado",
+      });
+    }
 
     const toUpdateAgent = {
       nome: value.nome,
@@ -112,7 +130,17 @@ async function partialUpdate(req, res) {
     });
   }
 
-  const { value } = partialSchema.validate(req.body);
+  const { error, value } = partialSchema.validate(req.body);
+
+  if (error) {
+    return res.status(400).json({
+      status: 400,
+      message: "Payload incorreto",
+      errors: {
+        id: "O payload está incorreto",
+      },
+    });
+  }
 
   
 

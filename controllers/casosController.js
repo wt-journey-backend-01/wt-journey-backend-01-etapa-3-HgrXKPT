@@ -85,8 +85,22 @@ async function createCase(req, res) {
   }).strict();
 
 try{
-  const { value } = createSchema.validate(req.body);
+  const { error, value } = createSchema.validate(req.body, {
+    allowUnknown: false
+  });
 
+   if (error) {
+    const errorDetails = error.details.reduce((acc, curr) => {
+      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
+      return acc;
+    }, {});
+
+    return res.status(400).json({
+      status: 400,
+      message: "Dados inválidos",
+      errors: errorDetails
+    });
+  }
 
 
   const existingAgent = await agentesRepository.findAgentById(value.agente_id);
@@ -104,7 +118,7 @@ try{
 
   
 
-   res.json(createdCase);
+   res.status(201).json(createdCase);
 
 } catch (error) {
   return res.status(500).json({
@@ -128,7 +142,22 @@ async function updateCase(req, res) {
   try{
       const { caso_id } = req.params;
 
-  const {value } = updateSchema.validate(req.body)
+  const { error, value } = updateSchema.validate(req.body, {
+    allowUnknown: false,
+  });
+
+  if (error) {
+    const errorDetails = error.details.reduce((acc, curr) => {
+      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
+      return acc;
+    }, {});
+
+    return res.status(400).json({
+      status: 400,
+      message: "Dados inválidos",
+      errors: errorDetails
+    });
+  }
 
   const existingCase = await casosRepository.findCaseById(caso_id);
   if (!existingCase) {
@@ -188,9 +217,22 @@ async function  partialUpdateCase(req, res) {
   try{
       const { caso_id } = req.params;
 
-  const {value} = updateSchema.validate(req.body, {
+  const {error, value} = updateSchema.validate(req.body, {
     allowUnknown: false,
   });
+
+   if (error) {
+    const errorDetails = error.details.reduce((acc, curr) => {
+      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
+      return acc;
+    }, {});
+
+    return res.status(400).json({
+      status: 400,
+      message: "Dados inválidos",
+      errors: errorDetails
+    });
+  }
 
 
   if (value.id && value.id !== caso_id) {
