@@ -82,25 +82,10 @@ async function createCase(req, res) {
     descricao: Joi.string().trim().min(1).required(),
     status: Joi.string().valid("aberto", "solucionado").required(),
     agente_id: Joi.number().required(),
-  }).strict();
-
-try{
-  const { error, value } = createSchema.validate(req.body, {
-    allowUnknown: false
   });
 
-   if (error) {
-    const errorDetails = error.details.reduce((acc, curr) => {
-      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
-      return acc;
-    }, {});
-
-    return res.status(400).json({
-      status: 400,
-      message: "Dados inválidos",
-      errors: errorDetails
-    });
-  }
+try{
+  const { value } = createSchema.validate(req.body);
 
 
   const existingAgent = await agentesRepository.findAgentById(value.agente_id);
