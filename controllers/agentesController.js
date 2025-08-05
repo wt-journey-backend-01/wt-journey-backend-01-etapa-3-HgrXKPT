@@ -132,6 +132,7 @@ async function partialUpdate(req, res) {
   
 
   const agente = await agentesRepository.findAgentById(id);
+  
   if (!agente) {
     return res.status(404).json({
       status: 404,

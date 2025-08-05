@@ -78,12 +78,7 @@ async function getAgenteAssociateToCase(req, res) {
 
 async function createCase(req, res) {
 
-   const createSchema = Joi.object({
-    titulo: Joi.string().trim().min(1).required(),
-    descricao: Joi.string().trim().min(1).required(),
-    status: Joi.string().valid("aberto", "solucionado").required(),
-    agente_id: Joi.number().required(),
-  });
+   const createSchema =   
 
 try{
   const { error, value } = createSchema.validate(req.body);
@@ -124,19 +119,16 @@ try{
 }}
 
 async function updateCase(req, res) {
-  const updateSchema = Joi.object({
+  const updateSchema = JJoi.object({
     titulo: Joi.string().trim().min(1).required(),
     descricao: Joi.string().trim().min(1).required(),
     status: Joi.string().valid("aberto", "solucionado").required(),
     agente_id: Joi.number().required(),
-  }).strict();
-
+  });
   try{
       const { caso_id } = req.params;
 
-  const { error, value } = updateSchema.validate(req.body, {
-    allowUnknown: false,
-  });
+  const { error, value } = updateSchema.validate(req.body);
 
   if (error) {
     return res.status(400).json({
@@ -199,25 +191,18 @@ async function  partialUpdateCase(req, res) {
     descricao: Joi.string().trim().min(1).optional(),
     status: Joi.string().valid("aberto", "solucionado").optional(),
     agente_id: Joi.number().optional(),
-  }).strict();
+  });
 
   try{
       const { caso_id } = req.params;
 
-  const {error, value} = updateSchema.validate(req.body, {
-    allowUnknown: false,
-  });
+  const {error, value} = updateSchema.validate(req.body);
 
    if (error) {
-    const errorDetails = error.details.reduce((acc, curr) => {
-      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
-      return acc;
-    }, {});
-
     return res.status(400).json({
       status: 400,
       message: "Dados inválidos",
-      errors: errorDetails
+      errors: error.details,
     });
   }
 
@@ -256,6 +241,7 @@ async function  partialUpdateCase(req, res) {
   const updated = await casosRepository.updateCase(caso_id, value);
 
   return res.status(200).json(updated);
+  
   }catch (error) {
     return res.status(500).json({
       status: 500,

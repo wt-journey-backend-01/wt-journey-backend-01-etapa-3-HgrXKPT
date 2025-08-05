@@ -35,9 +35,12 @@ const db = require('../db/db');
       const query =  db('casos');
 
     const caso = await  query.where({ id }).first();
+    if(!caso){
+      return null
+    }
     
 
-    return caso || null;  
+    return caso;  
     }catch (error) {
       throw new Error('Erro ao buscar caso: ' + error.message);
     }
@@ -86,12 +89,11 @@ async function createCase(caseData){
   }
 }
 async function deleteCase(id){
+    const query = db('casos')
 
-    const deleted = await db('casos')
-      .where({ id })
-      .del();
+    const deleted = await query.where({ id }).del();
 
-      if(!deleted){
+      if(deleted === 0){
          return null
       }
   return true; // Retorna o número de registros deletados

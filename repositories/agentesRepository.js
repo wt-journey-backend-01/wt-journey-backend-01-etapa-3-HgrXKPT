@@ -26,11 +26,13 @@ async function findAll(filters) {
 async function findAgentById(id) {
 
   try{
-    const agente = await db("agentes").where({ id }).first();
+    const query = db("agentes");
+    const agente = await query.where({ id }).first();
+
   if (!agente) {
     return null; // Ou lance um erro, dependendo da lógica do seu aplicativo
   }
-  return agente || null;
+  return agente;
   }catch (error) {
     throw new Error("Erro ao buscar agente: " + error.message);
   }
@@ -66,7 +68,7 @@ async function updateAgent(id, agenteData) {
     .returning("*");
 
     if(!updatedAgent) {
-      throw new Error("Erro ao atualizar agente: o repositório retornou null/undefined"); 
+      return null
     }
   return updatedAgent;
   }catch(error) {
@@ -77,7 +79,7 @@ async function updateAgent(id, agenteData) {
 
 async function deleteAgent(id) {
   const deleted = await db("agentes").where({ id }).del();
-  if (!deleted) {
+  if (deleted === 0) {
     return null
   }
   return true; // Retorna o número de registros deletados
