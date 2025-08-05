@@ -7,6 +7,7 @@ async function getAllCasos(req, res) {
   try{
     const { status, agente_id, search } = req.query;
   const filters = { status, agente_id, search }
+
   const casos = await casosRepository.findAll(filters);
   
   return res.status(200).json(casos);
@@ -101,9 +102,7 @@ try{
     return res.status(404).json({
       status: 404,
       message: "Agente inexistente",
-      errors: {
-        id: "Agente não encontrado",
-      },
+      errors: errors.details
     });
   };
 
@@ -140,11 +139,6 @@ async function updateCase(req, res) {
   });
 
   if (error) {
-    const errorDetails = error.details.reduce((acc, curr) => {
-      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
-      return acc;
-    }, {});
-
     return res.status(400).json({
       status: 400,
       message: "Dados inválidos",

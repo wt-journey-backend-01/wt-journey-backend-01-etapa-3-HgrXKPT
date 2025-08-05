@@ -35,6 +35,7 @@ const db = require('../db/db');
       const query =  db('casos');
 
     const caso = await  query.where({ id }).first();
+    
 
     return caso || null;  
     }catch (error) {
@@ -71,6 +72,10 @@ async function createCase(caseData){
       .where({ id })
       .update(updated)
       .returning('*');
+
+      if(!updatedCase){
+        return null
+      }
 
  
 

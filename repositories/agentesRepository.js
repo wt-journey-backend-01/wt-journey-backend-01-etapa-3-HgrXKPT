@@ -44,7 +44,7 @@ async function createAgent(agenteData) {
       .returning("*"); // Retorna todas as colunas do registro criado
 
       if (!createdAgent) {
-        throw new Error("Erro ao criar agente: o repositório retornou null/undefined"); 
+        return null; // Ou lance um erro, dependendo da lógica do seu aplicativo 
       }
 
     return{
@@ -78,7 +78,7 @@ async function updateAgent(id, agenteData) {
 async function deleteAgent(id) {
   const deleted = await db("agentes").where({ id }).del();
   if (!deleted) {
-    throw new Error("Erro ao deletar agente: o repositório retornou null/undefined");
+    return null
   }
   return true; // Retorna o número de registros deletados
 }
