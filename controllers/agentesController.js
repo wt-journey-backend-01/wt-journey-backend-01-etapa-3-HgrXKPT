@@ -70,24 +70,7 @@ async function updateAgent(req, res) {
       });
     }
 
-    const { error, value } = agentSchema.validate(req.body);
-
-    
-    if (error) {
-      return res.status(400).json({
-        status: 400,
-        message: "Dados inválidos",
-        errors: error.details,
-      });
-    }
-
-    const existingAgent = await agentesRepository.findAgentById(id);
-    if (!existingAgent) {
-      return res.status(404).json({
-        status: 404,
-        message: "Agente não encontrado",
-      });
-    }
+    const {  value } = agentSchema.validate(req.body);
 
     const toUpdateAgent = {
       nome: value.nome,
@@ -129,17 +112,7 @@ async function partialUpdate(req, res) {
     });
   }
 
-  const { error, value } = partialSchema.validate(req.body);
-
-  if (error) {
-    return res.status(400).json({
-      status: 400,
-      message: "Payload incorreto",
-      errors: {
-        id: "O payload está incorreto",
-      },
-    });
-  }
+  const { value } = partialSchema.validate(req.body);
 
   
 
