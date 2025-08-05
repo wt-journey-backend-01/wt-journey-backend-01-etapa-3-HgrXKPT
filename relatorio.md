@@ -2,26 +2,18 @@
 
 # 🧪 Relatório de Avaliação – Journey Levty Etapa 1 - HgrXKPT
 
-**Data:** 05/08/2025 02:20
+**Data:** 05/08/2025 02:26
 
-**Nota Final:** `24.18/100`
+**Nota Final:** `50.79/100`
 **Status:** ❌ Reprovado
 
 ---
 ## ✅ Requisitos Obrigatórios
-- Foram encontrados `20` problemas nos requisitos obrigatórios. Veja abaixo os testes que falharam:
-  - ⚠️ **Falhou no teste**: `CREATE: Cria agentes corretamente`
-    - **Melhoria sugerida**: A criação de agentes (`POST /agentes`) não está conforme o esperado. O teste esperava um status `201 Created` e os dados do agente no corpo da resposta. Verifique a lógica da sua rota para garantir que o agente é salvo e a resposta é formatada corretamente.
-  - ⚠️ **Falhou no teste**: `READ: Lista todos os agente corretamente`
-    - **Melhoria sugerida**: A listagem de agentes (`GET /agentes`) não está correta. O teste esperava um status `200 OK` e um array de agentes. Certifique-se de que sua rota está buscando e retornando todos os agentes de forma adequada.
-  - ⚠️ **Falhou no teste**: `READ: Busca agente por ID corretamente`
-    - **Melhoria sugerida**: A busca de agente por ID (`GET /agentes/:id`) falhou. O teste esperava um status `200 OK` e o objeto do agente correspondente ao ID. Verifique a lógica de busca e o tratamento de IDs na sua rota.
+- Foram encontrados `11` problemas nos requisitos obrigatórios. Veja abaixo os testes que falharam:
   - ⚠️ **Falhou no teste**: `UPDATE: Atualiza dados do agente com por completo (com PUT) corretamente`
     - **Melhoria sugerida**: A atualização completa de agentes (`PUT /agentes/:id`) não funcionou. O teste esperava um status `200 OK` e o agente com os dados atualizados. Verifique se sua rota está recebendo o payload completo e substituindo os dados existentes corretamente.
-  - ⚠️ **Falhou no teste**: `UPDATE: Atualiza dados do agente com por completo (com PATCH) corretamente`
-    - **Melhoria sugerida**: A atualização parcial de agentes (`PATCH /agentes/:id`) falhou. O teste esperava um status `200 OK` e o agente com os dados parcialmente atualizados. Verifique se sua rota está recebendo o payload parcial e aplicando as mudanças sem sobrescrever o objeto inteiro.
-  - ⚠️ **Falhou no teste**: `DELETE: Deleta dados de agente corretamente`
-    - **Melhoria sugerida**: A exclusão de agente (`DELETE /agentes/:id`) não funcionou como esperado. O teste esperava um status `204 No Content` e que o agente fosse realmente removido. Verifique a lógica de exclusão na sua rota.
+  - ⚠️ **Falhou no teste**: `CREATE: Recebe status code 400 ao tentar criar agente com payload em formato incorreto`
+    - **Melhoria sugerida**: Seu endpoint de criação de agentes (`POST /agentes`) não está validando payloads incorretos. O teste enviou dados inválidos e esperava um status `400 Bad Request`, mas recebeu outro. Implemente uma validação robusta para os dados de entrada.
   - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar agente por completo com método PUT de agente inexistente`
     - **Melhoria sugerida**: Ao tentar atualizar um agente inexistente com `PUT /agentes/:id`, o teste não recebeu `404 Not Found`. A rota deve indicar que o recurso não foi encontrado.
   - ⚠️ **Falhou no teste**: `UPDATE: Recebe status code 404 ao tentar atualizar agente por parcialmente com método PATCH de agente inexistente`
@@ -30,16 +22,6 @@
     - **Melhoria sugerida**: Ao tentar deletar um agente com ID inexistente (`DELETE /agentes/:id`), o teste não recebeu `404 Not Found`. Sua rota deve sinalizar quando o recurso a ser deletado não é encontrado.
   - ⚠️ **Falhou no teste**: `CREATE: Cria casos corretamente`
     - **Melhoria sugerida**: A criação de casos (`POST /casos`) não está como o esperado. O teste esperava um status `201 Created` e os dados do caso no corpo da resposta. Revise a lógica da sua rota de criação de casos.
-  - ⚠️ **Falhou no teste**: `Lista todos os casos corretamente`
-    - **Melhoria sugerida**: A listagem de casos (`GET /casos`) não está correta. O teste esperava um status `200 OK` e um array de casos. Certifique-se de que sua rota está buscando e retornando todos os casos de forma adequada.
-  - ⚠️ **Falhou no teste**: `READ: Busca caso por ID corretamente`
-    - **Melhoria sugerida**: A busca de caso por ID (`GET /casos/:id`) falhou. O teste esperava um status `200 OK` e o objeto do caso correspondente ao ID. Verifique a lógica de busca e o tratamento de IDs na sua rota.
-  - ⚠️ **Falhou no teste**: `UPDATE: Atualiza dados de um caso com por completo (com PUT) corretamente`
-    - **Melhoria sugerida**: A atualização completa de casos (`PUT /casos/:id`) não funcionou. O teste esperava um status `200 OK` e o caso com os dados atualizados. Verifique se sua rota está recebendo o payload completo e substituindo os dados existentes corretamente.
-  - ⚠️ **Falhou no teste**: `UPDATE: Atualiza dados de um caso parcialmente (com PATCH) corretamente`
-    - **Melhoria sugerida**: A atualização parcial de casos (`PATCH /casos/:id`) falhou. O teste esperava um status `200 OK` e o caso com os dados parcialmente atualizados. Verifique se sua rota está recebendo o payload parcial e aplicando as mudanças sem sobrescrever o objeto inteiro.
-  - ⚠️ **Falhou no teste**: `DELETE: Deleta dados de um caso corretamente`
-    - **Melhoria sugerida**: A exclusão de caso (`DELETE /casos/:id`) não funcionou como esperado. O teste esperava um status `204 No Content` e que o caso fosse realmente removido. Verifique a lógica de exclusão na sua rota.
   - ⚠️ **Falhou no teste**: `CREATE: Recebe status code 404 ao tentar criar caso com id de agente inválido/inexistente`
     - **Melhoria sugerida**: Ao tentar criar um caso com um `agente_id` inexistente, o teste não recebeu `404 Not Found`. Sua API deve ser capaz de identificar que o agente referenciado não existe e retornar o status apropriado.
   - ⚠️ **Falhou no teste**: `READ: Recebe status code 404 ao tentar buscar um caso por ID inválido`
@@ -52,10 +34,20 @@
     - **Melhoria sugerida**: Ao tentar deletar um caso com ID inexistente (`DELETE /casos/:id`), o teste não recebeu `404 Not Found`. Sua rota deve sinalizar quando o recurso a ser deletado não é encontrado.
 
 ## ⭐ Itens de Destaque (recupera até 40 pontos)
-- Nenhum item bônus foi identificado. Tente adicionar mais estilo e complexidade ao seu código nas próximas tentativas!
+- Você conquistou `2` bônus! Excelente trabalho nos detalhes adicionais!
+  - 🌟 **Testes bônus passados**: `Simple Filtering: Estudante implementou endpoint de filtragem de caso por status corretamente`
+    - Parabéns! Você implementou a filtragem de casos por status (`GET /casos?status=...`) corretamente. Isso adiciona uma funcionalidade poderosa à sua API para gerenciar casos.
+  - 🌟 **Testes bônus passados**: `Simple Filtering: Estudante implementou endpoint de filtragem de caso por agente corretamente`
+    - Ótimo! A filtragem de casos por `agente_id` (`GET /casos?agente_id=...`) está funcionando corretamente. Isso permite listar casos específicos de cada agente.
 
 ## ❌ Problemas Detectados (Descontos de até 100 pontos)
-- Nenhuma infração grave foi detectada. Muito bom nesse aspecto!
+- Foram encontrados `3` problemas que acarretam descontos. Veja abaixo os testes penalizados:
+  - ⚠️ **Falhou no teste de penalidade**: `Validation: Consegue registrar agente com data de incorporação no futuro`
+    - **Correção sugerida**: **Penalidade:** Sua API permitiu o registro de um agente com uma `dataDeIncorporacao` no futuro. Datas de incorporação não devem ser futuras. Implemente uma validação para impedir isso.
+  - ⚠️ **Falhou no teste de penalidade**: `Validation: Consegue registrar agente com nome vazio`
+    - **Correção sugerida**: **Penalidade:** Sua API permitiu o registro de um agente com `nome` vazio. Campos obrigatórios como o nome não devem ser aceitos se estiverem vazios.
+  - ⚠️ **Falhou no teste de penalidade**: `Validation: Consegue registrar agente com cargo vazio`
+    - **Correção sugerida**: **Penalidade:** Sua API permitiu o registro de um agente com `cargo` vazio. Campos obrigatórios como o cargo não devem ser aceitos se estiverem vazios.
 
 ---
 Continue praticando e caprichando no código. Cada detalhe conta! 💪
