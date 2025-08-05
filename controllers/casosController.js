@@ -118,7 +118,7 @@ try{
 
   
 
-   res.status(201).json(createdCase);
+   res.json(createdCase);
 
 } catch (error) {
   return res.status(500).json({
