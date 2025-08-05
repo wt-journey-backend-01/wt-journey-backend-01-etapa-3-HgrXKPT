@@ -70,6 +70,14 @@ async function updateAgent(req, res) {
     cargo: Joi.string().trim().min(1).required(),
   });
     const { id } = req.params;
+    
+     const existingAgent = await agentesRepository.findAgentById(id);
+    if (!existingAgent) {
+      return res.status(404).json({
+        status: 404,
+        message: "Agente não encontrado",
+      });
+    }
 
     const { error, value } = agentSchema.validate(req.body);
     
@@ -81,13 +89,7 @@ async function updateAgent(req, res) {
       });
     }
 
-    const existingAgent = await agentesRepository.findAgentById(id);
-    if (!existingAgent) {
-      return res.status(404).json({
-        status: 404,
-        message: "Agente não encontrado",
-      });
-    }
+   
 
 
     const updated = await agentesRepository.updateAgent(id, value);
