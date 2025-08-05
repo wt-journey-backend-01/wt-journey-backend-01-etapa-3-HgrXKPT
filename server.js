@@ -20,7 +20,7 @@ app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/casos', casosRoute);
 app.use('/agentes', agentesRoute);
 
-app.use(errorHandler);
+
 
 
 
