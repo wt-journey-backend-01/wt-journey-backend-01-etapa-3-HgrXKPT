@@ -66,7 +66,15 @@ async function updateAgent(id, agenteData) {
     if(!updatedAgent) {
       return null
     }
-  return updatedAgent;
+
+    const updated = {
+      ...updatedAgent,
+      dataDeIncorporacao: new Date(agenteData.dataDeIncorporacao)
+        .toISOString()
+        .split("T")[0],
+    };
+
+  return updated;
   }
   
 

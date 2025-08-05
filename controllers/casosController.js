@@ -130,7 +130,7 @@ async function updateCase(req, res) {
     status: Joi.string().valid("aberto", "solucionado").required(),
     agente_id: Joi.number().required(),
   });
-  try{
+
       const { caso_id } = req.params;
 
   const { error, value } = updateSchema.validate(req.body);
@@ -177,15 +177,7 @@ async function updateCase(req, res) {
 
   const updated = await casosRepository.updateCase(caso_id, value);
   return res.status(200).json(updated);
-  }catch (error) {
-    return res.status(500).json({
-      status: 500,
-      message: "Erro ao atualizar caso",
-      errors: {
-        internal: error.message
-      }
-    });
-  }
+  
 
   
 }
@@ -260,7 +252,7 @@ async function  partialUpdateCase(req, res) {
 }
 
 async function deleteCase(req, res) {
-  
+
   const { caso_id } = req.params;
  
 

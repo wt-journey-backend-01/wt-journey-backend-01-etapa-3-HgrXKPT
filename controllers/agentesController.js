@@ -69,7 +69,6 @@ async function updateAgent(req, res) {
     dataDeIncorporacao: Joi.date().iso().max("now").required(),
     cargo: Joi.string().trim().min(1).required(),
   });
-  try {
     const { id } = req.params;
 
     const { error, value } = agentSchema.validate(req.body);
@@ -93,11 +92,9 @@ async function updateAgent(req, res) {
 
     const updated = await agentesRepository.updateAgent(id, value);
     return res.status(200).json(updated);
-    
-  } catch (error) {
-    return res.status(500).json({ error: error.message });
+
   }
-}
+
 
 async function partialUpdate(req, res) {
   const partialSchema = Joi.object({
@@ -164,7 +161,7 @@ async function partialUpdate(req, res) {
 }
 
 async function deleteAgent(req, res) {
-  try{
+
     const { id } = req.params;
 
     const existingAgent = await agentesRepository.findAgentById(id);
@@ -190,16 +187,7 @@ async function deleteAgent(req, res) {
     });
   }
 
-  }catch (error) {
-    return res.status(500).json({
-      status: 500,
-      message: "Erro ao deletar agente",
-      errors: {
-        internal: error.message
-      }
-    });
-  }
-  
+
 
   return res.status(204).send();
 }
