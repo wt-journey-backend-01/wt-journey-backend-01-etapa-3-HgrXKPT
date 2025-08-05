@@ -33,7 +33,15 @@ async function addAgente(req, res) {
     cargo: Joi.string().trim().min(1).required(),
   });
   try{
-    const { value } = agentSchema.validate(req.body);
+    const {error, value } = agentSchema.validate(req.body);
+
+    if(error){
+      return res.status(400).json({
+        status: 400,
+        message: "Dados inválidos",
+        errors: error.details,
+      });
+    }
 
 
   const agent = await agentesRepository.createAgent(value);

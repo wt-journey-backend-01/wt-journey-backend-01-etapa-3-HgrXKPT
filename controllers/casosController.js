@@ -85,7 +85,15 @@ async function createCase(req, res) {
   });
 
 try{
-  const { value } = createSchema.validate(req.body);
+  const { error, value } = createSchema.validate(req.body);
+
+   if(error){
+      return res.status(400).json({
+        status: 400,
+        message: "Dados inválidos",
+        errors: error.details,
+      });
+    }
 
 
   const existingAgent = await agentesRepository.findAgentById(value.agente_id);
