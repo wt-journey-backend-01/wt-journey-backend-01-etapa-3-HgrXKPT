@@ -31,7 +31,7 @@ const db = require('../db/db');
 }
 
  async function findCaseById(id){
-    try{
+
       const query =  db('casos');
 
     const caso = await  query.where({ id }).first();
@@ -41,16 +41,14 @@ const db = require('../db/db');
     
 
     return caso;  
-    }catch (error) {
-      throw new Error('Erro ao buscar caso: ' + error.message);
-    }
+  
     
    
 
 }
 
 async function createCase(caseData){
-  try{
+
     const [createdCase] = await db('casos').insert(caseData).returning('*');
     if(!createdCase){
       throw new Error('Erro ao criar caso: o repositório retornou null/undefined'); 
@@ -58,16 +56,13 @@ async function createCase(caseData){
     return createdCase
   
     
-  }catch (error) {
-    throw new Error('Erro ao criar caso: ' + error.message);
-  }
+
     
 
 }
 
  async function updateCase(id, caseData){
-  
-  try{  
+ 
     const updated = {
     ...caseData
   }
@@ -84,9 +79,7 @@ async function createCase(caseData){
 
       return updatedCase;
 
-  }catch (error) {
-    throw new Error('Erro ao atualizar caso: ' + error.message);
-  }
+  
 }
 async function deleteCase(id){
     const query = db('casos')

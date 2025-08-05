@@ -92,8 +92,8 @@ async function updateAgent(req, res) {
 
 
     const updated = await agentesRepository.updateAgent(id, value);
-
     return res.status(200).json(updated);
+    
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -132,7 +132,7 @@ async function partialUpdate(req, res) {
   
 
   const agente = await agentesRepository.findAgentById(id);
-  
+
   if (!agente) {
     return res.status(404).json({
       status: 404,

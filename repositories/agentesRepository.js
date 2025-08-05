@@ -25,7 +25,7 @@ async function findAll(filters) {
 
 async function findAgentById(id) {
 
-  try{
+
     const query = db("agentes");
     const agente = await query.where({ id }).first();
 
@@ -33,14 +33,12 @@ async function findAgentById(id) {
     return null; // Ou lance um erro, dependendo da lógica do seu aplicativo
   }
   return agente;
-  }catch (error) {
-    throw new Error("Erro ao buscar agente: " + error.message);
-  }
+
   
 }
 
 async function createAgent(agenteData) {
-  try {
+
     const [createdAgent] = await db("agentes")
       .insert(agenteData)
       .returning("*"); // Retorna todas as colunas do registro criado
@@ -55,13 +53,11 @@ async function createAgent(agenteData) {
         .toISOString()
         .split("T")[0],
     } 
-  } catch (dbError) {
-    throw new Error("Erro ao criar agente: " + dbError.message);
-  }
-}
+  } 
+
 
 async function updateAgent(id, agenteData) {
-  try{
+
     const [updatedAgent] = await db("agentes")
     .where({ id })
     .update(agenteData)
@@ -71,11 +67,9 @@ async function updateAgent(id, agenteData) {
       return null
     }
   return updatedAgent;
-  }catch(error) {
-    throw new Error("Erro ao atualizar agente: " + error.message);
   }
   
-}
+
 
 async function deleteAgent(id) {
   const deleted = await db("agentes").where({ id }).del();

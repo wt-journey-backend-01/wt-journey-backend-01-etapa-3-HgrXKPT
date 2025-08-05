@@ -260,6 +260,7 @@ async function  partialUpdateCase(req, res) {
 }
 
 async function deleteCase(req, res) {
+  
   const { caso_id } = req.params;
  
 
