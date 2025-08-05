@@ -78,9 +78,14 @@ async function getAgenteAssociateToCase(req, res) {
 
 async function createCase(req, res) {
 
-   const createSchema =   
+   const createSchema = Joi.object({
+    titulo: Joi.string().trim().min(1).required(),
+    descricao: Joi.string().trim().min(1).required(),
+    status: Joi.string().valid("aberto", "solucionado").required(),
+    agente_id: Joi.number().required(),
+  }); 
 
-try{
+  try{
   const { error, value } = createSchema.validate(req.body);
 
    if(error){
@@ -119,7 +124,7 @@ try{
 }}
 
 async function updateCase(req, res) {
-  const updateSchema = JJoi.object({
+  const updateSchema = Joi.object({
     titulo: Joi.string().trim().min(1).required(),
     descricao: Joi.string().trim().min(1).required(),
     status: Joi.string().valid("aberto", "solucionado").required(),
@@ -241,7 +246,7 @@ async function  partialUpdateCase(req, res) {
   const updated = await casosRepository.updateCase(caso_id, value);
 
   return res.status(200).json(updated);
-  
+
   }catch (error) {
     return res.status(500).json({
       status: 500,
