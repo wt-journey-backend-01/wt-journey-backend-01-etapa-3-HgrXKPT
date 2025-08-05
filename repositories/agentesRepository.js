@@ -28,7 +28,7 @@ async function findAgentById(id) {
   try{
     const agente = await db("agentes").where({ id }).first();
   if (!agente) {
-    throw new Error("Agente não encontrado");
+    return null; // Ou lance um erro, dependendo da lógica do seu aplicativo
   }
   return agente || null;
   }catch (error) {

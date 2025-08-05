@@ -72,15 +72,7 @@ async function updateAgent(req, res) {
   try {
     const { id } = req.params;
 
-    if (req.body.id && req.body.id !== id) {
-      return res.status(400).json({
-        status: 400,
-        message: "Não é permitido alterar o campo 'id'.",
-      });
-    }
-
     const { error, value } = agentSchema.validate(req.body);
-
     
     if (error) {
       return res.status(400).json({
@@ -98,23 +90,8 @@ async function updateAgent(req, res) {
       });
     }
 
-    const toUpdateAgent = {
-      nome: value.nome,
-      dataDeIncorporacao: value.dataDeIncorporacao,
-      cargo: value.cargo,
-    }
 
-    const updated = await agentesRepository.updateAgent(id, toUpdateAgent);
-
-    if (!updated) {
-     return res.status(404).json({
-      status: 404,
-      message: "Agente não encontrado",
-      errors: {
-        id: "O agente não foi encontrado",
-      },
-    });
-    }
+    const updated = await agentesRepository.updateAgent(id, value);
 
     return res.status(200).json(updated);
   } catch (error) {
@@ -127,9 +104,11 @@ async function partialUpdate(req, res) {
     nome: Joi.string().trim().min(1).optional(),
     dataDeIncorporacao: Joi.date().iso().max("now").optional(),
     cargo: Joi.string().trim().min(1).optional(),
-  }).min(1);
+  });
 
-  const { id } = req.params;
+
+  try{
+    const { id } = req.params;
 
   if (req.body.id && req.body.id !== id) {
     return res.status(400).json({
@@ -153,7 +132,6 @@ async function partialUpdate(req, res) {
   
 
   const agente = await agentesRepository.findAgentById(id);
-
   if (!agente) {
     return res.status(404).json({
       status: 404,
@@ -174,6 +152,14 @@ async function partialUpdate(req, res) {
   const updated = await agentesRepository.updateAgent(id, toUpdateAgent);
 
   return res.status(200).json(updated);
+  }catch (error) {
+    return res.status(500).json({
+      status: 500,
+      message: "Erro ao atualizar agente",
+      errors: error.details
+    });
+  }
+  
 }
 
 async function deleteAgent(req, res) {
