@@ -30,7 +30,7 @@ async function findAgentById(id) {
     const agente = await query.where({ id }).first();
 
   if (!agente) {
-    return null; // Ou lance um erro, dependendo da lógica do seu aplicativo
+    return null;
   }
   return agente;
 
