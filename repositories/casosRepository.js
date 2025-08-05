@@ -51,12 +51,9 @@ async function createCase(caseData){
     if(!createdCase){
       throw new Error('Erro ao criar caso: o repositório retornou null/undefined'); 
     }
-    return {
-      ...createdCase,
-      dataDeIncorporacao: new Date(agente.dataDeIncorporacao)
-        .toISOString()
-        .split("T")[0],
-    };
+    return createdCase
+  
+    
   }catch (error) {
     throw new Error('Erro ao criar caso: ' + error.message);
   }

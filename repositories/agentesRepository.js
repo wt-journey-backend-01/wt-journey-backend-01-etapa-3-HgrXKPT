@@ -47,7 +47,12 @@ async function createAgent(agenteData) {
         throw new Error("Erro ao criar agente: o repositório retornou null/undefined"); 
       }
 
-    return createdAgent;
+    return{
+      ...createdAgent,
+      dataDeIncorporacao: new Date(agenteData.dataDeIncorporacao)
+        .toISOString()
+        .split("T")[0],
+    } 
   } catch (dbError) {
     throw new Error("Erro ao criar agente: " + dbError.message);
   }

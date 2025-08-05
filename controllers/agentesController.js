@@ -33,36 +33,13 @@ async function addAgente(req, res) {
     cargo: Joi.string().trim().min(1).required(),
   });
   try{
-    const { error, value } = agentSchema.validate(req.body);
-
-  if (error) {
-    const errorDetails = error.details.reduce((acc, curr) => {
-      acc[curr.path[0]] = curr.message.replace(/"/g, "'");
-      return acc;
-    }, {});
-
-    return res.status(400).json({
-      status: 400,
-      message: "Dados inválidos",
-      errors: errorDetails
-    });
-  }
-
+    const { value } = agentSchema.validate(req.body);
 
   const agent = await agentesRepository.createAgent(value);
 
 
 
-  return res.status(201).json({
-      status: 201,
-      message: "Agente criado com sucesso",
-      data: {
-        id: agent.id,
-        nome: agent.nome,
-        dataDeIncorporacao: agent.dataDeIncorporacao.toISOString().split('T')[0],
-        cargo: agent.cargo
-      }
-    });
+  return res.status(201).json(agent);
 
 
   }catch (error) {
