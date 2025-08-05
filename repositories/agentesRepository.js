@@ -18,7 +18,13 @@ async function findAll(filters) {
     if(!agentes) {
       return null; 
     }
-    return agentes ;
+
+   
+    return agentes.map(agente => ({
+      ...agente,
+      dataDeIncorporacao: new Date(agente.dataDeIncorporacao)
+        .toISOString()
+        .split("T")[0]}));
 
 
 }
@@ -33,7 +39,14 @@ async function findAgentById(id) {
     if (!agente) {
       return null;
     }
-  return agente;
+
+    const formatedDateAgent = {
+      ...agente,
+      dataDeIncorporacao: new Date(agente.dataDeIncorporacao)
+        .toISOString()
+        .split("T")[0],
+    }
+  return formatedDateAgent;
   
    
 

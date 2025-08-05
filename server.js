@@ -2,7 +2,6 @@ const express = require('express')
 const app = express();
 
 const errorHandler = require(`./utils/errorHandler`);
-const notFoundHandler = require(`./utils/notFoundHandler`);
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./docs/swagger');
 
@@ -17,11 +16,11 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/docs',  swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/casos', casosRoute);
 app.use('/agentes', agentesRoute);
 
-app.use(notFoundHandler); // Middleware para lidar com rotas não encontradas
+
 app.use(errorHandler); // Middleware para lidar com erros
 
 

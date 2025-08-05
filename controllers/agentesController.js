@@ -15,6 +15,15 @@ async function findById(req, res) {
     const { id } = req.params;
 
     const agente = await agentesRepository.findAgentById(id);
+    if(!agente){
+      return res.status(404).json({
+        status: 404,
+        message: "Agente não encontrado",
+        errors: {
+          id: "Nenhum agente encontrado com o ID fornecido",
+        },
+      });
+    }
     res.status(200).json(agente);
   } catch (error) {
     return res.status(404).json({
@@ -72,11 +81,8 @@ async function updateAgent(req, res) {
     const { id } = req.params;
     
      const existingAgent = await agentesRepository.findAgentById(id);
-    if (!existingAgent) {
-      return res.status(404).json({
-        status: 404,
-        message: "Agente não encontrado",
-      });
+    if(!existingAgent) {
+      return res.status(404).json();
     }
 
     const { error, value } = agentSchema.validate(req.body);
