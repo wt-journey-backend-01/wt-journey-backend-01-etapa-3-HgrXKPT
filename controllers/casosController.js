@@ -28,6 +28,9 @@ async function getCasoById(req, res) {
 
 
   const { caso_id } = req.params;
+  if (!Number.isInteger(caso_id)) {
+      return res.status(400).json({ error: "ID inválido: deve ser um número inteiro." });
+    }
 
   const caso = await casosRepository.findCaseById(caso_id);
 

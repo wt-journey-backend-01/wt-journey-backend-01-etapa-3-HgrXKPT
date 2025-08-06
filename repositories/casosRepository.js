@@ -35,6 +35,7 @@ const db = require('../db/db');
     const query =  db("casos");
 
     const caso = await query.where({ id }).first();
+    
     return caso;  
   
     
